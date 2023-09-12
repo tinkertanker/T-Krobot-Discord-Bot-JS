@@ -1,4 +1,10 @@
-const { SlashCommandBuilder } = require("discord.js");
+const {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  SlashCommandBuilder,
+  EmbedBuilder,
+} = require("discord.js");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -12,10 +18,31 @@ module.exports = {
     const name = interaction.options.getString("name");
     const channel = client.channels.cache.get("1150657346817769560");
 
-    await channel.send(" Do you want to verify " + name + "?");
+    await channel.send({
+      content: "<todo: ping the verifiers role>",
+      embeds: [
+        new EmbedBuilder()
+          .setTitle(`${name} joined. `)
+          .setDescription(
+            `${name} has just joined the server. If you recognise the user as a trainer, choose Yes and they will be let in.`
+          ),
+      ],
+      components: [
+        new ActionRowBuilder().addComponents(
+          new ButtonBuilder()
+            .setCustomId("yes")
+            .setLabel("Yes")
+            .setStyle(ButtonStyle.Success),
+          new ButtonBuilder()
+            .setCustomId("no")
+            .setLabel("No")
+            .setStyle(ButtonStyle.Danger)
+        ),
+      ],
+    });
 
     return interaction.reply({
-      content: `Wait for review`,
+      content: `Wait for a while, we are verifying you`,
       ephemeral: true,
     });
   },
