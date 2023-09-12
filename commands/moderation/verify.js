@@ -12,15 +12,7 @@ module.exports = {
     const name = interaction.options.getString("name");
     const channel = client.channels.cache.get("1150657346817769560");
 
-    await channel.send(name + " Do you want to verify this person?");
-
-    await interaction.channel.bulkDelete(name, true).catch((error) => {
-      console.error(error);
-      interaction.reply({
-        content: "There was an error transmitting this to the mods",
-        ephemeral: true,
-      });
-    });
+    await channel.send(" Do you want to verify " + name + "?");
 
     return interaction.reply({
       content: `Wait for review`,
