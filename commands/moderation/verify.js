@@ -17,6 +17,10 @@ module.exports = {
     const client = interaction.client;
     const name = interaction.options.getString("name");
     const channel = client.channels.cache.get("1150657346817769560");
+    const roles = {
+      verified: "",
+      admininstrator: "",
+    };
 
     await channel.send({
       content: "<todo: ping the verifiers role>",
@@ -30,11 +34,11 @@ module.exports = {
       components: [
         new ActionRowBuilder().addComponents(
           new ButtonBuilder()
-            .setCustomId("yes")
+            .setCustomId("accept")
             .setLabel("Yes")
             .setStyle(ButtonStyle.Success),
           new ButtonBuilder()
-            .setCustomId("no")
+            .setCustomId("reject")
             .setLabel("No")
             .setStyle(ButtonStyle.Danger)
         ),
@@ -47,3 +51,27 @@ module.exports = {
     });
   },
 };
+// put this into the main code later
+client.on("interactionCreate", (interaction) => {
+  if (interaction.isButton()) {
+    const role = interaction.guild.roles.cache.get(roles[interaction.customId]);
+    if (!role)
+      return interaction.reply({ content: "Role not found", ephemeral: true });
+
+    return interaction.member.roles
+      .add(role)
+      .then((member) =>
+        interaction.reply({
+          content: `The ${role} was added to you`,
+          ephemeral: true,
+        })
+      )
+      .catch((err) => {
+        console.log(err);
+        return interaction.reply({
+          content: "Something went wrong",
+          ephemeral: true,
+        });
+      });
+  }
+});
