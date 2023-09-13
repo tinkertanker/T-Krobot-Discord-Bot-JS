@@ -43,28 +43,29 @@ module.exports = {
     });
     //code for the button to work, I assume it is put here, I would never know
     client.on("interactionCreate", (interaction) => {
-      //watch the video to understand what its doing
       if (interaction.isButton()) {
         if (interaction.customId == "verified") {
-          return (
-            interaction.member.roles
-              .add(verifiedRole)
-              // eslint-disable-next-line no-unused-vars
-              .then((member) =>
-                interaction.reply({
-                  content: `You are now verified `,
-                  ephemeral: true,
-                })
-              )
-              .catch((err) => {
-                console.log(err);
-                return interaction.reply({
-                  content: "Something went wrong",
-                  ephemeral: true,
-                });
+          //Mods side
+          interaction.member.roles
+            .add(verifiedRole)
+            // eslint-disable-next-line no-unused-vars
+            .then((member) =>
+              interaction.reply({
+                content: `User is now verified `,
+                ephemeral: true,
               })
-          );
+            )
+            .catch((err) => {
+              console.log(err);
+              return interaction.reply({
+                content: "Something went wrong",
+                ephemeral: true,
+              });
+            });
+          //User side (may need to async this)
+          interaction.user.send("You are now verified");
         } else {
+          //mods side
           return interaction.reply({
             content: "User was not given verified role",
             ephemeral: true,
@@ -72,7 +73,7 @@ module.exports = {
         }
       }
     });
-
+    //User side
     return interaction.reply({
       content: `Wait for a while, we are verifying you`,
       ephemeral: true,
