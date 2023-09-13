@@ -17,13 +17,10 @@ module.exports = {
     const client = interaction.client;
     const name = interaction.options.getString("name");
     const channel = client.channels.cache.get("1150657346817769560");
-    const roles = {
-      verified: "",
-      admininstrator: "",
-    };
+    const verifiedRole = "1151010223813820487";
 
     await channel.send({
-      content: "<todo: ping the verifiers role>",
+      content: "<todo: dm the user that they have the role>",
       embeds: [
         new EmbedBuilder()
           .setTitle(`${name} joined. `)
@@ -34,7 +31,7 @@ module.exports = {
       components: [
         new ActionRowBuilder().addComponents(
           new ButtonBuilder()
-            .setCustomId("accept")
+            .setCustomId("verified")
             .setLabel("Yes")
             .setStyle(ButtonStyle.Success),
           new ButtonBuilder()
@@ -44,6 +41,37 @@ module.exports = {
         ),
       ],
     });
+    //code for the button to work, I assume it is put here, I would never know
+    client.on("interactionCreate", (interaction) => {
+      //watch the video to understand what its doing
+      if (interaction.isButton()) {
+        if (interaction.customId == "verified") {
+          return (
+            interaction.member.roles
+              .add(verifiedRole)
+              // eslint-disable-next-line no-unused-vars
+              .then((member) =>
+                interaction.reply({
+                  content: `You are now verified `,
+                  ephemeral: true,
+                })
+              )
+              .catch((err) => {
+                console.log(err);
+                return interaction.reply({
+                  content: "Something went wrong",
+                  ephemeral: true,
+                });
+              })
+          );
+        } else {
+          return interaction.reply({
+            content: "User was not given verified role",
+            ephemeral: true,
+          });
+        }
+      }
+    });
 
     return interaction.reply({
       content: `Wait for a while, we are verifying you`,
@@ -51,27 +79,3 @@ module.exports = {
     });
   },
 };
-// put this into the main code later
-client.on("interactionCreate", (interaction) => {
-  if (interaction.isButton()) {
-    const role = interaction.guild.roles.cache.get(roles[interaction.customId]);
-    if (!role)
-      return interaction.reply({ content: "Role not found", ephemeral: true });
-
-    return interaction.member.roles
-      .add(role)
-      .then((member) =>
-        interaction.reply({
-          content: `The ${role} was added to you`,
-          ephemeral: true,
-        })
-      )
-      .catch((err) => {
-        console.log(err);
-        return interaction.reply({
-          content: "Something went wrong",
-          ephemeral: true,
-        });
-      });
-  }
-});
