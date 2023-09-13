@@ -20,7 +20,6 @@ module.exports = {
     const verifiedRole = "1151010223813820487";
 
     await channel.send({
-      content: "<todo: dm the user that they have the role>",
       embeds: [
         new EmbedBuilder()
           .setTitle(`${name} joined. `)
@@ -65,11 +64,12 @@ module.exports = {
           //User side (may need to async this)
           interaction.user.send("You are now verified");
         } else {
-          //mods side
-          return interaction.reply({
+          //mods side, no need return (will just mess up the code)
+          interaction.reply({
             content: "User was not given verified role",
             ephemeral: true,
-          });
+          }); //user side
+          interaction.user.send("Try again");
         }
       }
     });
