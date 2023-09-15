@@ -40,7 +40,6 @@ module.exports = {
         ),
       ],
     });
-    //code for the button to work, I assume it is put here, I would never know
     client.on("interactionCreate", (interaction) => {
       if (interaction.isButton()) {
         if (interaction.customId == "verified") {

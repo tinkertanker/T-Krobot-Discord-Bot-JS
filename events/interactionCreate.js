@@ -1,4 +1,4 @@
-const { Events, ButtonBuilder, GuildMemberRoleManager } = require("discord.js");
+const { Events, ButtonBuilder } = require("discord.js");
 
 module.exports = {
   name: Events.InteractionCreate,
@@ -22,7 +22,7 @@ module.exports = {
     } else if (interaction.isButton()) {
       if (ButtonBuilder.customId === "yes") {
         const role = interaction.options.getRole("Verified");
-        const member = interaction.options.getMember("target"); //does not work, need user ID, see other one
+        const member = interaction.options.getMember("target");
         member.roles.add(role);
       } else if (ButtonBuilder.customId === "no") {
         return interaction.reply("try again");
