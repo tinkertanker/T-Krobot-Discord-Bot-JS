@@ -107,7 +107,7 @@ module.exports = {
       } catch (error) {
         console.error(error);
         interaction.reply({
-          content: "An error occurred deleting moving the channel.",
+          content: "An error occurred while creating the channel.",
           ephermal: true,
         });
       }
