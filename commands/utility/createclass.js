@@ -60,42 +60,57 @@ module.exports = {
     const permissions = options.getRole("permission-role");
 
     if (channeltype === "textchannel") {
-      await guild.channels.create({
-        name: `${channelname}`,
-        type: ChannelType.GuildText,
-        parent: parent,
-        permissionOverwrites: [
-          {
-            id: permissions,
-            allow: [
-              ViewChannel,
-              SendMessages,
-              ReadMessageHistory,
-              ManageChannel,
-              ManagePermissions,
-            ],
-          },
-        ],
-      });
-      //add the one from verify here(the add role function based on custom ID)
+      try {
+        await guild.channels.create({
+          name: `${channelname}`,
+          type: ChannelType.GuildText,
+          parent: parent,
+          permissionOverwrites: [
+            {
+              id: permissions,
+              allow: [
+                ViewChannel,
+                SendMessages,
+                ReadMessageHistory,
+                ManageChannel,
+                ManagePermissions,
+              ],
+            },
+          ],
+        });
+        await interaction.reply({
+          content: "The text channel has been created",
+          ephermal: true,
+        });
+      } catch (error) {
+        console.error(error);
+        interaction.reply("An error occurred while creating the channel.");
+      }
     }
     if (channeltype === "voicechannel") {
-      await guild.channels.create({
-        name: `${channelname}`,
-        type: ChannelType.GuildText,
-        parent: parent,
-        permissionOverwrites: [
-          {
-            id: permissions,
-            allow: [ViewChannel, Connect, Speak],
-          },
-        ],
-      });
-      //add the one from verify here(the add role function based on custom ID)
+      try {
+        await guild.channels.create({
+          name: `${channelname}`,
+          type: ChannelType.GuildText,
+          parent: parent,
+          permissionOverwrites: [
+            {
+              id: permissions,
+              allow: [ViewChannel, Connect, Speak],
+            },
+          ],
+        });
+        await interaction.reply({
+          content: "The voice channel has been created",
+          ephermal: true,
+        });
+      } catch (error) {
+        console.error(error);
+        interaction.reply({
+          content: "An error occurred deleting moving the channel.",
+          ephermal: true,
+        });
+      }
     }
-    await interaction.reply({
-      content: "The channel has been created",
-      ephermal: true,
-    });
   },
 };

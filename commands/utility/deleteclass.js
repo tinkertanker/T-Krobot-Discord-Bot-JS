@@ -14,10 +14,18 @@ module.exports = {
   async execute(interaction) {
     const { options } = interaction;
     const channel = options.getChannel("channel");
-    channel.delete();
-    await interaction.reply({
-      content: "The channel has been deleted",
-      ephermal: true,
-    });
+    try {
+      await channel.delete();
+      await interaction.reply({
+        content: "The channel has been deleted",
+        ephermal: true,
+      });
+    } catch (error) {
+      console.error(error);
+      interaction.reply({
+        content: "An error occurred deleting moving the channel.",
+        ephermal: true,
+      });
+    }
   },
 };

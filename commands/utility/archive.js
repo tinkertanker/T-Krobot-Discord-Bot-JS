@@ -37,7 +37,10 @@ module.exports = {
       interaction.reply(`Moved ${channelToMove} to ${categoryToMoveTo}.`);
     } catch (error) {
       console.error(error);
-      interaction.reply("An error occurred while moving the channel.");
+      interaction.reply({
+        content: "An error occurred deleting moving the channel.",
+        ephermal: true,
+      });
     }
   },
 };

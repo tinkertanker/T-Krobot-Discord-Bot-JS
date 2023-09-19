@@ -16,7 +16,7 @@ module.exports = {
       option
         .setName("description")
         .setRequired(true)
-        .setDescription("The text of the page")
+        .setDescription("Description of the page")
     ),
   // the functions of this object
   async execute(interaction) {
