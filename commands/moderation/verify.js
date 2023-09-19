@@ -16,23 +16,28 @@ module.exports = {
   async execute(interaction) {
     const client = interaction.client;
     const name = interaction.options.getString("name");
-    const channel = client.channels.cache.get("1150657346817769560");
-    const verifiedRole = "1151010223813820487";
+    const channel = client.channels.cache.get("1086943862796333118");
+    const verifiedRole = "1086943974004113481";
+    const tinkertanker = "1086189634008141824";
 
     await channel.send({
       embeds: [
         new EmbedBuilder()
           .setTitle(`${name} joined. `)
           .setDescription(
-            `${name} has just joined the server. If you recognise the user as a trainer, choose Yes and they will be let in.`
+            `${name} has just joined the server. If you recognise the user as a trainer, choose Trainer and they will be let in.`
           ),
       ],
       components: [
         new ActionRowBuilder().addComponents(
           new ButtonBuilder()
             .setCustomId("verified")
-            .setLabel("Yes")
+            .setLabel("Trainer")
             .setStyle(ButtonStyle.Success),
+          new ButtonBuilder()
+            .setCustomId("tinkertanker")
+            .setLabel("Tinkertanker")
+            .setStyle(ButtonStyle.Primary),
           new ButtonBuilder()
             .setCustomId("reject")
             .setLabel("No")
@@ -49,7 +54,26 @@ module.exports = {
             // eslint-disable-next-line no-unused-vars
             .then((member) =>
               interaction.reply({
-                content: `User is now verified `,
+                content: `User is now Trainer `,
+                ephemeral: true,
+              })
+            )
+            .catch((err) => {
+              console.log(err);
+              return interaction.reply({
+                content: "Something went wrong",
+                ephemeral: true,
+              });
+            });
+          //User side (may need to async this)
+          interaction.user.send("You are now verified");
+        } else if (interaction.customId == "tinkertanker") {
+          interaction.member.roles
+            .add(tinkertanker)
+            // eslint-disable-next-line no-unused-vars
+            .then((member) =>
+              interaction.reply({
+                content: `User is now Tinkertanker `,
                 ephemeral: true,
               })
             )

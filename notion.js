@@ -1,7 +1,7 @@
 const { notionKey } = require("./config.json");
 
 function createNotionPage(name, discordInfo) {
-  const databaseId = "33ef76c1722149e38b5c76eaee799dd8";
+  const databaseId = "64ec0317d92c47ecb19fec1e78a8a6c7";
   const url = "https://api.notion.com/v1/pages";
 
   const requestBody = {

@@ -1,4 +1,4 @@
-const { Events, ButtonBuilder } = require("discord.js");
+const { Events } = require("discord.js");
 
 module.exports = {
   name: Events.InteractionCreate,
@@ -19,16 +19,6 @@ module.exports = {
         console.error(`Error executing ${interaction.commandName}`);
         console.error(error);
       }
-    } else if (interaction.isButton()) {
-      if (ButtonBuilder.customId === "yes") {
-        const role = interaction.options.getRole("Verified");
-        const member = interaction.options.getMember("target");
-        member.roles.add(role);
-      } else if (ButtonBuilder.customId === "no") {
-        return interaction.reply("try again");
-      }
-    } else if (interaction.isStringSelectMenu()) {
-      // respond to the select menu
     }
   },
 };

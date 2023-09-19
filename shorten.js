@@ -5,7 +5,7 @@ function shortenURL(originalURL, short) {
     method: "POST",
     body: JSON.stringify({
       // the domain for the shortened link
-      domain: "bcet.short.gy",
+      domain: "tk.sg",
       originalURL,
       path: short, //short is the name of the link
     }),

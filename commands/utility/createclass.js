@@ -45,15 +45,8 @@ module.exports = {
   async execute(interaction) {
     // eslint-disable-next-line no-unused-vars
     const { guild, member, options } = interaction;
-    const {
-      ViewChannel,
-      ReadMessageHistory,
-      SendMessages,
-      Connect,
-      Speak,
-      ManageChannel,
-      ManagePermissions,
-    } = PermissionFlagsBits;
+    const { ViewChannel, ReadMessageHistory, SendMessages, Connect, Speak } =
+      PermissionFlagsBits;
     const channeltype = options.getString("channeltype");
     const channelname = options.getString("channelname");
     const parent = options.getChannel("parent");
@@ -68,15 +61,15 @@ module.exports = {
           permissionOverwrites: [
             {
               id: permissions,
-              allow: [
-                ViewChannel,
-                SendMessages,
-                ReadMessageHistory,
-                ManageChannel,
-                ManagePermissions,
-              ],
+              allow: [ViewChannel, SendMessages, ReadMessageHistory],
             },
           ],
+        });
+        guild.roles.create({
+          data: {
+            name: `${channelname}`,
+            color: "BLUE",
+          },
         });
         await interaction.reply({
           content: "The text channel has been created",
@@ -99,6 +92,12 @@ module.exports = {
               allow: [ViewChannel, Connect, Speak],
             },
           ],
+        });
+        guild.roles.create({
+          data: {
+            name: `${channelname}`,
+            color: "BLUE",
+          },
         });
         await interaction.reply({
           content: "The voice channel has been created",
