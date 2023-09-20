@@ -62,32 +62,49 @@ module.exports = {
 
     if (channeltype === "textchannel") {
       try {
-        await guild.channels.create({
-          name: `${channelname}`,
-          type: ChannelType.GuildText,
-          parent: parent,
-          permissionOverwrites: [
-            {
-              id: permissions,
-              allow: [
-                ViewChannel,
-                SendMessages,
-                ReadMessageHistory,
-                ManageChannels,
-                ManageRoles,
-              ],
-            },
-          ],
-        });
-        guild.roles.create({
-          name: `${channelname.replace(" ", "-")}`,
-          permissions: [
-            PermissionsBitField.Flags.SendMessages,
-            PermissionsBitField.Flags.ViewChannel,
-            PermissionsBitField.Flags.ReadMessageHistory,
-          ],
-          color: "Blue",
-        });
+        await guild.channels
+          .create({
+            name: `${channelname}`,
+            type: ChannelType.GuildText,
+            parent: parent,
+            permissionOverwrites: [
+              {
+                id: permissions,
+                allow: [
+                  ViewChannel,
+                  SendMessages,
+                  ReadMessageHistory,
+                  ManageChannels,
+                  ManageRoles,
+                ],
+              },
+            ],
+          })
+          .then((channel) => channel.send("Welcome to the channel!"))
+          .catch((err) => {
+            console.log(err);
+            return interaction.reply({
+              content: "The channel could not be created",
+              ephemeral: true,
+            });
+          });
+        guild.roles
+          .create({
+            name: `${channelname.replace(" ", "-")}`,
+            permissions: [
+              PermissionsBitField.Flags.SendMessages,
+              PermissionsBitField.Flags.ViewChannel,
+              PermissionsBitField.Flags.ReadMessageHistory,
+            ],
+            color: "Blue",
+          })
+          .catch((err) => {
+            console.log(err);
+            return interaction.reply({
+              content: "The role could not be created",
+              ephemeral: true,
+            });
+          });
         await interaction.reply({
           content: "The text channel has been created",
           ephermal: true,
@@ -99,26 +116,44 @@ module.exports = {
     }
     if (channeltype === "voicechannel") {
       try {
-        await guild.channels.create({
-          name: `${channelname}`,
-          type: ChannelType.GuildText,
-          parent: parent,
-          permissionOverwrites: [
-            {
-              id: permissions,
-              allow: [ViewChannel, Connect, Speak, ManageChannels],
-            },
-          ],
-        });
-        guild.roles.create({
-          name: `${channelname.replace(" ", "-")}`,
-          permissions: [
-            PermissionsBitField.Flags.SendMessages,
-            PermissionsBitField.Flags.ViewChannel,
-            PermissionsBitField.Flags.ReadMessageHistory,
-          ],
-          color: "Blue",
-        });
+        await guild.channels
+          .create({
+            name: `${channelname}`,
+            type: ChannelType.GuildText,
+            parent: parent,
+            permissionOverwrites: [
+              {
+                id: permissions,
+                allow: [ViewChannel, Connect, Speak, ManageChannels],
+              },
+            ],
+          })
+          .then((channel) => channel.send("Welcome to the channel!"))
+          .catch((err) => {
+            console.log(err);
+            return interaction.reply({
+              content: "The channel could not be created",
+              ephemeral: true,
+            });
+          });
+        guild.roles
+          .create({
+            name: `${channelname.replace(" ", "-")}`,
+            permissions: [
+              PermissionsBitField.Flags.SendMessages,
+              PermissionsBitField.Flags.ViewChannel,
+              PermissionsBitField.Flags.ReadMessageHistory,
+            ],
+            color: "Blue",
+          })
+          .then((channel) => channel.send("Welcome to the channel!"))
+          .catch((err) => {
+            console.log(err);
+            return interaction.reply({
+              content: "The role could not be created",
+              ephemeral: true,
+            });
+          });
         await interaction.reply({
           content: "The voice channel has been created",
           ephermal: true,

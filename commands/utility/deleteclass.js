@@ -20,7 +20,13 @@ module.exports = {
 
     try {
       await channel.delete();
-      await role.delete();
+      await role.delete().catch((err) => {
+        console.log(err);
+        return interaction.reply({
+          content: "Role could not be created",
+          ephemeral: true,
+        });
+      });
       await interaction.reply({
         content: "The channel has been deleted",
         ephermal: true,

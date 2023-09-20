@@ -4,6 +4,8 @@ const {
   ButtonStyle,
   SlashCommandBuilder,
   EmbedBuilder,
+  ChannelType,
+  PermissionFlagsBits,
 } = require("discord.js");
 
 module.exports = {
@@ -19,6 +21,9 @@ module.exports = {
     const channel = client.channels.cache.get("1086943862796333118");
     const verifiedRole = "1086943974004113481";
     const tinkertanker = "1086189634008141824";
+    const { guild } = interaction;
+    const { ViewChannel, ReadMessageHistory, SendMessages } =
+      PermissionFlagsBits;
 
     await channel.send({
       embeds: [
@@ -45,11 +50,11 @@ module.exports = {
         ),
       ],
     });
-    client.on("interactionCreate", (interaction) => {
+    client.on("interactionCreate", async (interaction) => {
       if (interaction.isButton()) {
         if (interaction.customId == "verified") {
           //Mods side
-          interaction.member.roles
+          await interaction.member.roles
             .add(verifiedRole)
             // eslint-disable-next-line no-unused-vars
             .then((member) =>
@@ -66,9 +71,29 @@ module.exports = {
               });
             });
           //User side (may need to async this)
-          interaction.user.send("You are now verified");
+          await interaction.user.send("You are now verified");
+          //create a personal channel, still does not work, apparently still connected??????
+          await interaction.guild.channels
+            .create({
+              name: `${name}`,
+              type: ChannelType.GuildText,
+              parent: "1103947971734810745",
+              permissionOverwrites: [
+                {
+                  allow: [ViewChannel, SendMessages, ReadMessageHistory],
+                },
+              ],
+            })
+            .then((channel) => channel.send("Welcome to your channel!"))
+            .catch((err) => {
+              console.log(err);
+              return interaction.reply({
+                content: "Could not create channel",
+                ephemeral: true,
+              });
+            });
         } else if (interaction.customId == "tinkertanker") {
-          interaction.member.roles
+          await interaction.member.roles
             .add(tinkertanker)
             // eslint-disable-next-line no-unused-vars
             .then((member) =>
@@ -85,9 +110,29 @@ module.exports = {
               });
             });
           //User side (may need to async this)
-          interaction.user.send("You are now verified");
+          await interaction.user.send("You are now verified");
+          //create a personal channel
+          await interaction.guild.channels
+            .create({
+              name: `${name}`,
+              type: ChannelType.GuildText,
+              parent: "1103947971734810745",
+              permissionOverwrites: [
+                {
+                  allow: [ViewChannel, SendMessages, ReadMessageHistory],
+                },
+              ],
+            })
+            .then((channel) => channel.send("Welcome to your channel!"))
+            .catch((err) => {
+              console.log(err);
+              return interaction.reply({
+                content: "Could not create channel",
+                ephemeral: true,
+              });
+            });
         } else {
-          //mods side, no need return (will just mess up the code)
+          //mods side, no need return
           interaction.reply({
             content: "User was not given verified role",
             ephemeral: true,
