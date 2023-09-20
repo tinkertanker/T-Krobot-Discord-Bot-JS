@@ -80,7 +80,7 @@ module.exports = {
           ],
         });
         guild.roles.create({
-          name: `${channelname}`,
+          name: `${channelname.replace(" ", "-")}`,
           permissions: [
             PermissionsBitField.Flags.SendMessages,
             PermissionsBitField.Flags.ViewChannel,
@@ -111,7 +111,7 @@ module.exports = {
           ],
         });
         guild.roles.create({
-          name: `${channelname}`,
+          name: `${channelname.replace(" ", "-")}`,
           permissions: [
             PermissionsBitField.Flags.SendMessages,
             PermissionsBitField.Flags.ViewChannel,

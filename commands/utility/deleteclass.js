@@ -26,6 +26,7 @@ module.exports = {
         ephermal: true,
       });
     } catch (error) {
+      console.log(role);
       console.error(error);
       interaction.reply({
         content: "An error occurred while deleting the channel.",
