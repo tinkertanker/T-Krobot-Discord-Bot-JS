@@ -2,6 +2,7 @@ const {
   SlashCommandBuilder,
   PermissionFlagsBits,
   ChannelType,
+  PermissionsBitField,
   // eslint-disable-next-line no-unused-vars
   GuildCategory,
 } = require("discord.js");
@@ -45,8 +46,15 @@ module.exports = {
   async execute(interaction) {
     // eslint-disable-next-line no-unused-vars
     const { guild, member, options } = interaction;
-    const { ViewChannel, ReadMessageHistory, SendMessages, Connect, Speak } =
-      PermissionFlagsBits;
+    const {
+      ViewChannel,
+      ReadMessageHistory,
+      ManageChannels,
+      ManageRoles,
+      SendMessages,
+      Connect,
+      Speak,
+    } = PermissionFlagsBits;
     const channeltype = options.getString("channeltype");
     const channelname = options.getString("channelname");
     const parent = options.getChannel("parent");
@@ -61,15 +69,24 @@ module.exports = {
           permissionOverwrites: [
             {
               id: permissions,
-              allow: [ViewChannel, SendMessages, ReadMessageHistory],
+              allow: [
+                ViewChannel,
+                SendMessages,
+                ReadMessageHistory,
+                ManageChannels,
+                ManageRoles,
+              ],
             },
           ],
         });
         guild.roles.create({
-          data: {
-            name: `${channelname}`,
-            color: "BLUE",
-          },
+          name: `${channelname}`,
+          permissions: [
+            PermissionsBitField.Flags.SendMessages,
+            PermissionsBitField.Flags.ViewChannel,
+            PermissionsBitField.Flags.ReadMessageHistory,
+          ],
+          color: "Blue",
         });
         await interaction.reply({
           content: "The text channel has been created",
@@ -89,15 +106,18 @@ module.exports = {
           permissionOverwrites: [
             {
               id: permissions,
-              allow: [ViewChannel, Connect, Speak],
+              allow: [ViewChannel, Connect, Speak, ManageChannels],
             },
           ],
         });
         guild.roles.create({
-          data: {
-            name: `${channelname}`,
-            color: "BLUE",
-          },
+          name: `${channelname}`,
+          permissions: [
+            PermissionsBitField.Flags.SendMessages,
+            PermissionsBitField.Flags.ViewChannel,
+            PermissionsBitField.Flags.ReadMessageHistory,
+          ],
+          color: "Blue",
         });
         await interaction.reply({
           content: "The voice channel has been created",

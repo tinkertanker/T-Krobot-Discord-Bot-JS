@@ -14,8 +14,13 @@ module.exports = {
   async execute(interaction) {
     const { options } = interaction;
     const channel = options.getChannel("channel");
+    const role = interaction.guild.roles.cache.find(
+      (role) => role.name == channel.name
+    );
+
     try {
       await channel.delete();
+      await role.delete();
       await interaction.reply({
         content: "The channel has been deleted",
         ephermal: true,
