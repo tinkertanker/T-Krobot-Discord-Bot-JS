@@ -16,44 +16,44 @@ module.exports = {
         .setDefaultMemberPermissions(PermissionFlagBits.Administrator)
         .addStringOption( option => 
             option
-                .setName("Title")
+                .setName("title")
                 .setDescription("Add name of the class")
                 .setRequired(true)
             )
         .addStringOption( option => 
             option
-                .setName("Details")
+                .setName("details")
                 .setDescription("Add any necessary details")
             )
         .addStringOption( option => 
             option
-                .setName("When")
+                .setName("when")
                 .setDescription("Add the date and time of the class")
                 .setRequired(true)
             )
         .addStringOption( option => 
             option
-                .setName("Where")
+                .setName("where")
                 .setDescription("Add the location of the class")
                 .setRequired(true)
             )
         .addStringOption( option => 
             option
-                .setName("Who")
+                .setName("who")
                 .setDescription("Add the number of instructors needed")
                 .setRequired(true)
             ),
 
     async execute(interaction) {
         const { options } = interaction;
-        const className = options.getString("Title");
-        const classDetails = options.getString("Details") ?? "No specific details have been provided.";
-        const classTime = options.getString("When"); 
-        const classLocation = options.getString("Where");
-        const classManpower = options.getString("Who"); 
+        const className = options.getString("title");
+        const classDetails = options.getString("details") ?? "No specific details have been provided.";
+        const classTime = options.getString("when"); 
+        const classLocation = options.getString("where");
+        const classManpower = options.getString("who"); 
 
-        await interaction.reply (
-            `${underscore(bold("CFI" + className))}
+        await interaction.reply ({
+            content: `${underscore(bold("CFI" + className))}
             ---
             ${underscore("Details: ")}
             ${classDetails}
@@ -61,7 +61,23 @@ module.exports = {
             ${underscore("Key Information: ")}
             ${italic("- When: ") + classTime}
             ${italic("- Where: ") + classLocation}
-            ${italic("- No. of instructors needed: ") + classManpower}`
-        )
+            ${italic("- No. of instructors needed: ") + classManpower}`, 
+            fetchReply: true,
+        })
+        
+        try {
+            await channel.threads.create({
+                name: `CFI: ${className}`, 
+                autoArchiveDuration: ThreadAutoArchiveDuration.OneDay, 
+            });
+            console.log("Created thread");
+        } catch (error) {
+            console.log(role);
+            console.error(error);
+            interaction.reply({
+              content: "An error occurred while creating the accompanying thread.",
+              ephermal: true,
+            });
+        }
     }
 }
