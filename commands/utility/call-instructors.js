@@ -64,7 +64,7 @@ module.exports = {
         });
         
         try {
-            await reply.createThread({
+            await reply.startThread({
                 name: `CFI: ${className}`, 
                 autoArchiveDuration: ThreadAutoArchiveDuration.OneDay, 
             });
