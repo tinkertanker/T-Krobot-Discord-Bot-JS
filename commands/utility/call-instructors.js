@@ -1,6 +1,6 @@
 const { 
     SlashCommandBuilder, 
-    PermissionFlagBits,
+    PermissionFlagsBits,
     bold, 
     italic, 
     underscore,
@@ -9,19 +9,14 @@ const { execute } = require("./createnotion");
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName("Call for Instructors")
+        .setName("call-instructors")
         .setDescription("Posts a call for instructors notice with various details included. Creates an accompanying thread.")
-        .setDefaultMemberPermissions(PermissionFlagBits.Administrator)
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
         .addStringOption( option => 
             option
                 .setName("title")
                 .setDescription("Add name of the class")
                 .setRequired(true)
-            )
-        .addStringOption( option => 
-            option
-                .setName("details")
-                .setDescription("Add any necessary details")
             )
         .addStringOption( option => 
             option
@@ -40,6 +35,11 @@ module.exports = {
                 .setName("who")
                 .setDescription("Add the number of instructors needed")
                 .setRequired(true)
+            )
+        .addStringOption( option => 
+            option
+                .setName("details")
+                .setDescription("Add any necessary details")
             ),
 
     async execute(interaction) {
@@ -51,31 +51,36 @@ module.exports = {
         const classManpower = options.getString("who"); 
 
         const reply = await interaction.reply ({
-            content: `${underscore(bold("CFI" + className))}
-            ---
-            ${underscore("Details: ")}
-            ${classDetails}
-            ---
-            ${underscore("Key Information: ")}
-            ${italic("- When: ") + classTime}
-            ${italic("- Where: ") + classLocation}
-            ${italic("- No. of instructors needed: ") + classManpower}`, 
-            fetchReply: true,
+            content: 
+            `
+${underscore(bold("CFI: " + className))}
+
+${underscore("Details: ")}
+${classDetails}
+
+${underscore("Key Information: ")}
+- When: ${classTime}
+- Where: ${classLocation}
+- No. of instructors needed: ${classManpower}
+
+---
+Note: a ✅ indicates that the CFI is open, and a ❌ indicates that the CFI is closed.`,
+          fetchReply: true,
         });
-        
+              
         try {
             await reply.startThread({
                 name: `CFI: ${className}`, 
-                autoArchiveDuration: ThreadAutoArchiveDuration.OneDay, 
+                autoArchiveDuration: 1440,
             });
-            await interaction.followUp({ content: "Your thread has been successfully created", ephermal: true});
+            await interaction.followUp({ content: "Your thread has been successfully created", ephemeral: true});
             console.log("Created thread");
-        } catch (error) {
-            console.log(role);
+            await reply.react("✅");
+        } catch(error) {
             console.error(error);
-            interaction.reply({
+            interaction.followUp({
               content: "An error occurred while creating the accompanying thread.",
-              ephermal: true,
+              ephemeral: true,
             });
         }
     }
