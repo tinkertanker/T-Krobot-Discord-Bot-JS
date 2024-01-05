@@ -3,16 +3,14 @@ const {
     PermissionFlagBits,
     bold, 
     italic, 
-    underscore, 
-    quote, 
-    blockQuote
+    underscore,
 } = require("discord.js");
 const { execute } = require("./createnotion");
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("Call for Instructors")
-        .setDescription("Posts a call for instructors notice with various details included")
+        .setDescription("Posts a call for instructors notice with various details included. Creates an accompanying thread.")
         .setDefaultMemberPermissions(PermissionFlagBits.Administrator)
         .addStringOption( option => 
             option
@@ -52,7 +50,7 @@ module.exports = {
         const classLocation = options.getString("where");
         const classManpower = options.getString("who"); 
 
-        await interaction.reply ({
+        const reply = await interaction.reply ({
             content: `${underscore(bold("CFI" + className))}
             ---
             ${underscore("Details: ")}
@@ -63,13 +61,14 @@ module.exports = {
             ${italic("- Where: ") + classLocation}
             ${italic("- No. of instructors needed: ") + classManpower}`, 
             fetchReply: true,
-        })
+        });
         
         try {
-            await channel.threads.create({
+            await reply.createThread({
                 name: `CFI: ${className}`, 
                 autoArchiveDuration: ThreadAutoArchiveDuration.OneDay, 
             });
+            await interaction.followUp({ content: "Your thread has been successfully created", ephermal: true});
             console.log("Created thread");
         } catch (error) {
             console.log(role);
