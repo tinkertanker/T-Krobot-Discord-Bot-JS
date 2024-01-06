@@ -2,10 +2,8 @@ const {
     SlashCommandBuilder, 
     PermissionFlagsBits,
     bold, 
-    italic, 
     underscore,
 } = require("discord.js");
-const { execute } = require("./createnotion");
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -74,7 +72,6 @@ Note: a ✅ indicates that the CFI is open, and a ❌ indicates that the CFI is 
                 autoArchiveDuration: 1440,
             });
             await interaction.followUp({ content: "Your thread has been successfully created", ephemeral: true});
-            console.log("Created thread");
             await reply.react("✅");
         } catch(error) {
             console.error(error);
