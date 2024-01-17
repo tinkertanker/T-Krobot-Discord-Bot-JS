@@ -59,6 +59,8 @@ module.exports = {
     const channelname = options.getString("channelname");
     const parent = options.getChannel("parent");
     const permissions = options.getRole("permission-role");
+    const everyoneID = guild.roles.everyone.id;
+    const userID = interaction.user.id;
 
     if (channeltype === "textchannel") {
       try {
@@ -78,9 +80,13 @@ module.exports = {
                   ManageRoles,
                 ],
               },
+              {
+                id: everyoneID,
+                deny: ViewChannel,
+              }
             ],
           })
-          .then((channel) => channel.send("Welcome to the channel!"))
+          .then((channel) => channel.send(`<@${userID}> Welcome to the channel!`))
           .catch((err) => {
             console.log(err);
             return interaction.reply({
@@ -107,7 +113,7 @@ module.exports = {
           });
         await interaction.reply({
           content: "The text channel has been created",
-          ephermal: true,
+          ephemeral: true,
         });
       } catch (error) {
         console.error(error);
@@ -126,9 +132,13 @@ module.exports = {
                 id: permissions,
                 allow: [ViewChannel, Connect, Speak, ManageChannels],
               },
+              {
+                id: everyoneID,
+                deny: ViewChannel,
+              }
             ],
           })
-          .then((channel) => channel.send("Welcome to the channel!"))
+          .then((channel) => channel.send(`<@${userID}> Welcome to the channel!`))
           .catch((err) => {
             console.log(err);
             return interaction.reply({
@@ -156,13 +166,13 @@ module.exports = {
           });
         await interaction.reply({
           content: "The voice channel has been created",
-          ephermal: true,
+          ephemeral: true,
         });
       } catch (error) {
         console.error(error);
         interaction.reply({
           content: "An error occurred while creating the channel.",
-          ephermal: true,
+          ephemeral: true,
         });
       }
     }
