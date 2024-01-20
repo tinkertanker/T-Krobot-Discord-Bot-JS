@@ -60,13 +60,13 @@ module.exports = {
         const classLocation = options.getString("where");
         const classManpower = options.getString("who"); 
         const classURL = options.getString("link");
-        let classImage = options.getAttachment("image") ?? "https://tinkercademy.com/wp-content/uploads/2019/03/01-Tinkercademy-Tertiary-Logo-Colour-On-Light-460w.png";
+        let classImage = options.getAttachment("image") ?? "https://tinkertanker.com/assets/images/image09.png?v=b3748329";
         const channel = interaction.channel ?? "Not a text channel";
       
         if (typeof(classImage) !== "string") {
           classImage = classImage.url
         }
-        
+
         const replyEmbed = await new EmbedBuilder()
             .setColor(0x0099FF)
             .setTitle(className)
