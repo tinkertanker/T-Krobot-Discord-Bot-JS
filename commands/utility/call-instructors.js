@@ -55,11 +55,11 @@ module.exports = {
     async execute(interaction) {
         const { options } = interaction;
         const className = options.getString("title");
-        const classDetails = options.getString("what") ?? "No specific details have been provided.";
+        const classDetails = options.getString("what").replace(/\\n/, "\n") ?? "No specific details have been provided.";
         const classTime = options.getString("when").replace(/\\n/, "\n"); 
-        const classLocation = options.getString("where");
-        const classManpower = options.getString("who"); 
-        const classURL = options.getString("link");
+        const classLocation = options.getString("where").replace(/\\n/, "\n");
+        const classManpower = options.getString("who").replace(/\\n/, "\n"); 
+        const classURL = options.getString("link") ?? "No link";
         let classImage = options.getAttachment("image") ?? "https://tinkertanker.com/assets/images/image09.png?v=b3748329";
         const channel = interaction.channel ?? "Not a text channel";
       
@@ -69,8 +69,8 @@ module.exports = {
 
         const replyEmbed = await new EmbedBuilder()
             .setColor(0x0099FF)
-            .setTitle(className)
-            .setURL(classURL)
+            .setTitle(classURL.includes("https://") ? className + " (Click here for map link)" : className)
+            .setURL(classURL.includes("No link") ? null : classURL)
             .setDescription(classDetails)
             .addFields(
                 { name: "Where", value: classLocation, inline: true },

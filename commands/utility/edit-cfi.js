@@ -1,4 +1,8 @@
-const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
+const {
+  SlashCommandBuilder,
+  PermissionFlagsBits,
+  EmbedBuilder,
+} = require("discord.js");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -54,34 +58,44 @@ module.exports = {
     ),
   async execute(interaction) {
     const { options } = interaction;
-    const title = options.getString("new-title");
     const messageID = options.getString("messageid");
-    const targetMessage = interaction.channel.messages.fetch(messageID)
-    const targetEmbed = targetMessage.embeds[0]
-    const newEmbed = EmbedBuilder.from(targetEmbed).setTitle(title)
 
-    try {
-      await targetMessage.edit({ embeds: [newEmbed] })
-      await interaction.reply("Edited")
-    } catch {
-      console.error(error)
-      await interaction.reply("Smt went wrong")
-
-    }
-
-
-
-    // await interaction.channel.messages.fetch(messageID)
-    //   .then(async (message) => {
-    //     try {
-    //       message.edit("penguinfied!!!");
-    //     } catch (error) {
-    //       console.error(error);
-    //       await interaction.reply({
-    //         content: "Something went wrong!",
-    //         ephemeral: true,
-    //       });
-    //     }
-    //   });
+    await interaction.channel.messages
+      .fetch(messageID)
+      .then(async (message) => {
+        const targetEmbed = message.embeds[0];
+        const title = options.getString("new-title") ?? targetEmbed.title;
+        const what =
+          options.getString("new-description") ?? targetEmbed.description;
+        const when =
+          options.getString("new-timing") ?? targetEmbed.fields[2].value;
+        const where =
+          options.getString("new-location") ?? targetEmbed.fields[0].value;
+        const who =
+          options.getString("new-manpower") ?? targetEmbed.fields[1].value;
+        const link = options.getString("new-link") ?? (targetEmbed.url ?? "No link");
+        const image = options.getAttachment("new-image") ?? targetEmbed.image.url;
+        const newEmbed = EmbedBuilder.from(targetEmbed)
+          .setTitle(link.includes("https://") && !title.includes(" (Click here for map link)") ? title + " (Click here for map link)" : title)
+          .setDescription(what)
+          .setURL(link.includes("No link") ? null : link)
+          .setFields(
+              { name: "Where", value: where, inline: true },
+              { name: "Who", value: who, inline: true }, 
+              { name: "When", value: when },
+          )
+          .setImage(typeof(image) == "string" ? image : image.url);
+          
+        try {
+          await message.edit({ embeds: [newEmbed] });
+          await interaction.reply({ content: "Edited.", ephemeral: true });
+        } catch (error) {
+          console.error(error);
+          await interaction.reply({
+            content: "Something went wrong!",
+            ephemeral: true,
+          });
+        }
+      });
   },
 };
