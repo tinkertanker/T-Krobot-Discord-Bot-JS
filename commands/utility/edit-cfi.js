@@ -15,6 +15,12 @@ module.exports = {
         .setDescription("The message ID of the CFI you wish to edit.")
         .setRequired(true)
     )
+    .addBooleanOption((option) =>
+      option
+        .setName("unlock-thread")
+        .setDescription("Whether to unlock the thread accompanying the CFI.")
+        .setRequired(true)
+    )
     .addStringOption((option) =>
       option
         .setName("new-title")
@@ -59,6 +65,7 @@ module.exports = {
   async execute(interaction) {
     const { options } = interaction;
     const messageID = options.getString("messageid");
+    const unlockThread = options.getBoolean("unlock-thread");
 
     await interaction.channel.messages
       .fetch(messageID)
@@ -73,22 +80,57 @@ module.exports = {
           options.getString("new-location") ?? targetEmbed.fields[0].value;
         const who =
           options.getString("new-manpower") ?? targetEmbed.fields[1].value;
-        const link = options.getString("new-link") ?? (targetEmbed.url ?? "No link");
-        const image = options.getAttachment("new-image") ?? targetEmbed.image.url;
+        const link =
+          options.getString("new-link") ?? targetEmbed.url ?? "No link";
+        const image =
+          options.getAttachment("new-image") ?? targetEmbed.image.url;
         const newEmbed = EmbedBuilder.from(targetEmbed)
-          .setTitle(link.includes("https://") && !title.includes(" (Click here for map link)") ? title + " (Click here for map link)" : title)
-          .setDescription(what)
+          .setTitle(
+            link.includes("https://") &&
+              !title.includes(" (Click here for map link)")
+              ? title.replaceAll(/\\n/g, "\n") + " (Click here for map link)"
+              : title.replaceAll(/\\n/g, "\n")
+          )
+          .setDescription(what.replaceAll(/\\n/g, "\n"))
           .setURL(link.includes("No link") ? null : link)
           .setFields(
-              { name: "Where", value: where, inline: true },
-              { name: "Who", value: who, inline: true }, 
-              { name: "When", value: when },
+            {
+              name: "Where",
+              value: where.replaceAll(/\\n/g, "\n"),
+              inline: true,
+            },
+            { name: "Who", value: who.replaceAll(/\\n/g, "\n"), inline: true },
+            { name: "When", value: when.replaceAll(/\\n/g, "\n") }
           )
-          .setImage(typeof(image) == "string" ? image : image.url);
-          
+          .setImage(typeof image == "string" ? image : image.url);
+
         try {
           await message.edit({ embeds: [newEmbed] });
           await interaction.reply({ content: "Edited.", ephemeral: true });
+          if (message.embeds.length !== 0 || message.hasThread) {
+            await message.thread.edit({ name: "CFI: " + title });
+            await interaction.followUp({
+              content: "Thread name edited as well.",
+              ephemeral: true,
+            });
+            if (unlockThread && message.thread.locked) {
+              await message.thread.setLocked(false);
+              await interaction.followUp({
+                content: "Thread unlocked.",
+                ephemeral: true,
+              });
+            } else if (!message.thread.locked) {
+              await interaction.followUp({
+                content: "Thread is not locked.", 
+                ephemeral: true
+              });
+            }
+          } else {
+            await interaction.followUp({
+              content: "There is no accompanying thread to edit.",
+              ephemeral: true,
+            });
+          }
         } catch (error) {
           console.error(error);
           await interaction.reply({
