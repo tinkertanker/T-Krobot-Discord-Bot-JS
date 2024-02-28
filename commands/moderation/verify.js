@@ -7,6 +7,7 @@ const {
   ChannelType,
   PermissionFlagsBits,
 } = require("discord.js");
+const { verificationChannel, trainerRole, tinkertankerRole, pmCategory } = require("../../config.json");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -18,9 +19,9 @@ module.exports = {
   async execute(interaction) {
     const client = interaction.client;
     const name = interaction.options.getString("name");
-    const channel = client.channels.cache.get("1086943862796333118");
-    const trainerRole = "1086943974004113481";
-    const tinkertankerRole = "1086189634008141824";
+    const channel = client.channels.cache.get(verificationChannel);
+    //const trainerRole = trainerRole;
+    //const tinkertankerRole = tinkertankerRole;
     const { guild } = interaction;
     const { ViewChannel, ReadMessageHistory, SendMessages } =
       PermissionFlagsBits;
@@ -75,7 +76,7 @@ module.exports = {
           .create({
             name: `${name.replace(" ", "-")}`,
             type: ChannelType.GuildText,
-            parent: "1103947971734810745",
+            parent: pmCategory,
             permissionOverwrites: [
               {
                 id: interaction.user.id,

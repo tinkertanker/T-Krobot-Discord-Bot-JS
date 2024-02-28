@@ -1,0 +1,11 @@
+{
+    "clientId": "app_id",
+    "guildId": "server_id",
+    "token": "bot_token",
+    "notionKey": "",
+    "shortIoKey": "",
+    "verificationChannel": "channel_id",
+    "trainerRole": "role_id",
+    "tinkertankerRole": "role_id",
+    "pmCategory": "channel_id"
+}
