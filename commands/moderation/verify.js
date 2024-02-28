@@ -18,6 +18,7 @@ module.exports = {
     ),
   async execute(interaction) {
     const client = interaction.client;
+    const user = interaction.user;
     const name = interaction.options.getString("name");
     const channel = client.channels.cache.get(verificationChannel);
     //const trainerRole = trainerRole;
@@ -26,9 +27,10 @@ module.exports = {
     const { ViewChannel, ReadMessageHistory, SendMessages } =
       PermissionFlagsBits;
     await channel.send({
+      content: `${user} joined.`,
       embeds: [
         new EmbedBuilder()
-          .setTitle(`${name} joined. `)
+          //.setTitle(`${name} joined. `)
           .setDescription(
             `${name} has just joined the server. If you recognise the user as a trainer, choose Trainer and they will be let in.`
           ),
@@ -52,8 +54,10 @@ module.exports = {
     });
     client.on("interactionCreate", async (interaction) => {
       async function doStuff(role) {
+        const newUser = interaction.message.mentions.users.first();
         //Mods side
-        await interaction.member.roles
+        newMember = await guild.members.fetch(newUser.id); 
+        await newMember.roles
           .add(role)
           // eslint-disable-next-line no-unused-vars
           .then((member) =>
@@ -70,7 +74,7 @@ module.exports = {
             });
           });
         //User side
-        await interaction.user.send("You are now verified");
+        await newUser.send("You are now verified");
         //create a personal channel
         await interaction.guild.channels
           .create({
@@ -79,7 +83,7 @@ module.exports = {
             parent: pmCategory,
             permissionOverwrites: [
               {
-                id: interaction.user.id,
+                id: newUser.id,
                 allow: [ViewChannel, SendMessages, ReadMessageHistory],
               },
               {
