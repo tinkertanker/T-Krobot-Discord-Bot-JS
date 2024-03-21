@@ -86,11 +86,25 @@ module.exports = {
           channelName += '-';
           channelName += (Math.random() + 1).toString(36).substring(7);
         }
+
+        var categoryName = "private-messages";
+        var parentCategory = await interaction.guild.channels.cache.find((cat) => (cat.name === categoryName));
+        while(true){
+          parentCategory = await interaction.guild.channels.cache.find((cat) => (cat.name === categoryName)); 
+          try {
+            if(parentCategory.children.cache.size >= 45) categoryName += "-";
+            else break;
+          } catch(err){
+            parentCategory = await interaction.guild.channels.create({ name: categoryName, type: ChannelType.GuildCategory });
+            break;
+          }
+        }
+
         await interaction.guild.channels
           .create({
             name: `${channelName}`,
             type: ChannelType.GuildText,
-            parent: pmCategory,
+            parent: parentCategory,
             permissionOverwrites: [
               {
                 id: newUser.id,
