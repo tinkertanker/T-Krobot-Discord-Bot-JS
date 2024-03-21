@@ -12,17 +12,16 @@ const { verificationChannel, trainerRole, tinkertankerRole, pmCategory } = requi
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("verify")
-    .setDescription("Lets you sbe verified.")
+    .setDescription("Lets you be verified.")
     .addStringOption((option) =>
-      option.setName("name").setDescription("Your name").setRequired(true)
+      option.setName("name").setDescription("Your full name").setRequired(true)
     ),
   async execute(interaction) {
     const client = interaction.client;
     const user = interaction.user;
     const name = interaction.options.getString("name");
     const channel = client.channels.cache.get(verificationChannel);
-    //const trainerRole = trainerRole;
-    //const tinkertankerRole = tinkertankerRole;
+    
     const { guild } = interaction;
     const { ViewChannel, ReadMessageHistory, SendMessages } =
       PermissionFlagsBits;
@@ -32,7 +31,7 @@ module.exports = {
         new EmbedBuilder()
           //.setTitle(`${name} joined. `)
           .setDescription(
-            `${name} has just joined the server. If you recognise the user as a trainer, choose Trainer and they will be let in.`
+            `${name} has just joined the server. Choose the appropriate role or reject them.`
           ),
       ],
       components: [
@@ -57,28 +56,35 @@ module.exports = {
         const newUser = interaction.message.mentions.users.first();
         //Mods side
         newMember = await guild.members.fetch(newUser.id); 
+        roleString = "";
+        if(role == trainerRole) roleString = "Trainer";
+        else if(role == tinkertankerRole) roleString = "Tinkertanker";
         await newMember.roles
           .add(role)
           // eslint-disable-next-line no-unused-vars
-          .then((member) =>
-            interaction.reply({
-              content: `User is now Verified `,
-              ephemeral: true,
-            })
-          )
+          //.then((member) =>
+          //  interaction.reply({
+          //    content: `User is now Verified with ${roleString} role`,
+          //  })
+          //)
           .catch((err) => {
             console.log(err);
             return interaction.reply({
-              content: "Something went wrong",
+              content: "Could not set user role!",
               ephemeral: true,
             });
           });
         //User side
         await newUser.send("You are now verified");
         //create a personal channel
+        channelName = name.replace(" ", "-").toLowerCase();
+        while((interaction.guild.channels.cache.find(c => c.name.toLowerCase() === channelName))) {
+          channelName += '-';
+          channelName += (Math.random() + 1).toString(36).substring(7);
+        }
         await interaction.guild.channels
           .create({
-            name: `${name.replace(" ", "-")}`,
+            name: `${channelName}`,
             type: ChannelType.GuildText,
             parent: pmCategory,
             permissionOverwrites: [
@@ -92,11 +98,25 @@ module.exports = {
               },
             ],
           })
-          .then((channel) => channel.send("Welcome to your channel!"))
+          .then((channel) => {
+            channel.send(`Welcome to your channel ${name}!`)
+          })
+          .then(() =>
+            interaction.update({
+              components: [],
+            })
+          )
+          .then(() => {
+            const userTag = interaction.message.mentions.users.first();
+            const channelTag = interaction.guild.channels.cache.find(channel => channel.name === channelName).toString()
+            interaction.editReply({
+              content: `${name} is now verified with ${roleString} role and channel ${channelTag} has been created`,
+            })
+          })
           .catch((err) => {
             console.log(err);
             return interaction.reply({
-              content: "Could not create channel",
+              content: "Could not create channel!",
               ephemeral: true,
             });
           });
@@ -110,10 +130,10 @@ module.exports = {
         } else {
           //mods side, no need return
           interaction.reply({
-            content: "User was not given verified role",
+            content: "User was not given verified role.",
             ephemeral: true,
           }); //user side
-          interaction.user.send("Try again");
+          interaction.user.send("Try again, or contact an admin.");
         }
       }
     });
