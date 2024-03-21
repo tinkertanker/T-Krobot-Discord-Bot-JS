@@ -56,6 +56,10 @@ module.exports = {
         const newUser = interaction.message.mentions.users.first();
         //Mods side
         newMember = await guild.members.fetch(newUser.id); 
+        await newMember.setNickname(name).catch((err) => {
+          console.log(err);
+          console.log("Could not set nickname!");
+        });
         roleString = "";
         if(role == trainerRole) roleString = "Trainer";
         else if(role == tinkertankerRole) roleString = "Tinkertanker";
