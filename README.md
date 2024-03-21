@@ -53,7 +53,3 @@ Remember to put the following in package.json on glitch
 If not deploy-commands.js will throw an error or it will die after 5 min
 
 It should be on Glitch’s boosted plan and be up 24/7, no need weird pinging and stuff
-
-## Server Template
-
-https://discord.new/vtywrYdy6tgN (from YJ)
