@@ -12,32 +12,30 @@ const { verificationChannel, trainerRole, tinkertankerRole, pmCategory } = requi
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("verify")
-    .setDescription("Lets you be verified.")
+    .setDescription("Lets an admin verify you.")
     .addStringOption((option) =>
       option.setName("name").setDescription("Your full name").setRequired(true)
     ),
   async execute(interaction) {
     const client = interaction.client;
-    const user = interaction.user;
-    const name = interaction.options.getString("name");
-    const channel = client.channels.cache.get(verificationChannel);
-    
+    const newUser = interaction.user;
+    const newName = interaction.options.getString("name");
+    const vChannel = client.channels.cache.get(verificationChannel);
     const { guild } = interaction;
-    const { ViewChannel, ReadMessageHistory, SendMessages } =
-      PermissionFlagsBits;
-    await channel.send({
-      content: `${user} joined.`,
+    const { ViewChannel, ReadMessageHistory, SendMessages } = PermissionFlagsBits;
+    
+    var unique = await vChannel.send({
+      content: `${newUser} joined.`,
       embeds: [
         new EmbedBuilder()
-          //.setTitle(`${name} joined. `)
           .setDescription(
-            `${name} has just joined the server. Choose the appropriate role or reject them.`
+            `${newName} has just joined the server. Choose the appropriate role or reject them.`
           ),
       ],
       components: [
         new ActionRowBuilder().addComponents(
           new ButtonBuilder()
-            .setCustomId("verified")
+            .setCustomId("trainer")
             .setLabel("Trainer")
             .setStyle(ButtonStyle.Success),
           new ButtonBuilder()
@@ -46,42 +44,38 @@ module.exports = {
             .setStyle(ButtonStyle.Primary),
           new ButtonBuilder()
             .setCustomId("reject")
-            .setLabel("No")
+            .setLabel("Reject")
             .setStyle(ButtonStyle.Danger)
         ),
       ],
     });
-    client.on("interactionCreate", async (interaction) => {
-      async function doStuff(role) {
+
+    const collector = unique.createMessageComponentCollector({ time: 604800000, });
+    collector.on('collect', async interaction => {
+      async function giveRole(role) {
         const newUser = interaction.message.mentions.users.first();
-        //Mods side
         newMember = await guild.members.fetch(newUser.id); 
-        await newMember.setNickname(name).catch((err) => {
+        //Set Nickname
+        await newMember.setNickname(newName).catch((err) => {
           console.log(err);
           console.log("Could not set nickname!");
         });
+        //Give user role
         roleString = "";
         if(role == trainerRole) roleString = "Trainer";
         else if(role == tinkertankerRole) roleString = "Tinkertanker";
         await newMember.roles
           .add(role)
-          // eslint-disable-next-line no-unused-vars
-          //.then((member) =>
-          //  interaction.reply({
-          //    content: `User is now Verified with ${roleString} role`,
-          //  })
-          //)
           .catch((err) => {
             console.log(err);
             return interaction.reply({
               content: "Could not set user role!",
-              ephemeral: true,
             });
           });
-        //User side
+        //Inform user
         await newUser.send("You are now verified");
-        //create a personal channel
-        channelName = name.replace(" ", "-").toLowerCase();
+        //Create a personal channel
+        channelName = newName.replace(" ", "-").toLowerCase();
         while((interaction.guild.channels.cache.find(c => c.name.toLowerCase() === channelName))) {
           channelName += '-';
           channelName += (Math.random() + 1).toString(36).substring(7);
@@ -117,7 +111,7 @@ module.exports = {
             ],
           })
           .then((channel) => {
-            channel.send(`Welcome to your channel ${name}!`)
+            channel.send(`Welcome to your channel ${newName}!`)
           })
           .then(() =>
             interaction.update({
@@ -127,30 +121,27 @@ module.exports = {
           .then(() => {
             const userTag = interaction.message.mentions.users.first();
             const channelTag = interaction.guild.channels.cache.find(channel => channel.name === channelName).toString()
-            interaction.editReply({
-              content: `${name} is now verified with ${roleString} role and channel ${channelTag} has been created`,
-            })
+            vChannel.send(`${userTag} is now verified with ${roleString} role and channel ${channelTag} has been created`);
           })
           .catch((err) => {
             console.log(err);
             return interaction.reply({
               content: "Could not create channel!",
-              ephemeral: true,
             });
           });
       }
 
       if (interaction.isButton()) {
-        if (interaction.customId == "verified") {
-          doStuff(trainerRole);
+        if (interaction.customId == "trainer") {
+          giveRole(trainerRole);
         } else if (interaction.customId == "tinkertanker") {
-          doStuff(tinkertankerRole);
+          giveRole(tinkertankerRole);
         } else {
-          //mods side, no need return
+          //To admins
           interaction.reply({
-            content: "User was not given verified role.",
-            ephemeral: true,
-          }); //user side
+            content: "User was rejected.",
+          });
+          //To user
           interaction.user.send("Try again, or contact an admin.");
         }
       }
