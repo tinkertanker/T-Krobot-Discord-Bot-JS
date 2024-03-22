@@ -115,12 +115,9 @@ module.exports = {
           })
           .then((channel) => {
             channel.send(`Welcome to your channel ${newUser}!`)
-          })
-          .then(() => {
             const userTag = interaction.message.mentions.users.first();
-            const channelTag = interaction.guild.channels.cache.find(channel => channel.name === channelName).toString()
             interaction.editReply({
-              content: `${userTag} is now verified with ${roleString} role and channel ${channelTag} has been created`,
+              content: `${userTag} is now verified with ${roleString} role and channel ${channel} has been created`,
               components: [],  
             });
           })
