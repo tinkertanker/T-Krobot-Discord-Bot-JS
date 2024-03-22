@@ -35,15 +35,15 @@ module.exports = {
       components: [
         new ActionRowBuilder().addComponents(
           new ButtonBuilder()
-            .setCustomId("trainer")
+            .setCustomId("newtrainer")
             .setLabel("Trainer")
             .setStyle(ButtonStyle.Success),
           new ButtonBuilder()
-            .setCustomId("tinkertanker")
+            .setCustomId("newtinkertanker")
             .setLabel("Tinkertanker")
             .setStyle(ButtonStyle.Primary),
           new ButtonBuilder()
-            .setCustomId("reject")
+            .setCustomId("newreject")
             .setLabel("Reject")
             .setStyle(ButtonStyle.Danger)
         ),
@@ -135,9 +135,9 @@ module.exports = {
       }
 
       if (interaction.isButton()) {
-        if (interaction.customId == "trainer") {
+        if (interaction.customId == "newtrainer") {
           giveRole(trainerRole);
-        } else if (interaction.customId == "tinkertanker") {
+        } else if (interaction.customId == "newtinkertanker") {
           giveRole(tinkertankerRole);
         } else {
           //To admins
