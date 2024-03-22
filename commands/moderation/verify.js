@@ -82,7 +82,7 @@ module.exports = {
           channelName += (Math.random() + 1).toString(36).substring(7);
         }
 
-        allChannels = await interaction.guild.channels.cache;
+        var categoryName = "private-messages";
         var parentCategory = interaction.guild.channels.cache.find((cat) => (cat.name === categoryName));
         while(true){
           parentCategory = interaction.guild.channels.cache.find((cat) => (cat.name === categoryName)); 
