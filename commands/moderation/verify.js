@@ -74,17 +74,20 @@ module.exports = {
           });
         //Inform user
         await newUser.send("You are now verified");
+
+        var allChannels = await interaction.guild.channels.cache;
         //Create a personal channel
         channelName = newName.replace(" ", "-").toLowerCase();
-        while((interaction.guild.channels.cache.find(c => c.name.toLowerCase() === channelName))) {
+        while((allChannels.find(c => c.name.toLowerCase() === channelName))) {
           channelName += '-';
           channelName += (Math.random() + 1).toString(36).substring(7);
         }
 
+        allChannels = interaction.guild.channels.cache;
         var categoryName = "private-messages";
-        var parentCategory = await interaction.guild.channels.cache.find((cat) => (cat.name === categoryName));
+        var parentCategory = allChannels.find((cat) => (cat.name === categoryName));
         while(true){
-          parentCategory = await interaction.guild.channels.cache.find((cat) => (cat.name === categoryName)); 
+          parentCategory = allChannels.find((cat) => (cat.name === categoryName)); 
           try {
             if(parentCategory.children.cache.size >= 45) categoryName += "-";
             else break;
@@ -111,7 +114,7 @@ module.exports = {
             ],
           })
           .then((channel) => {
-            channel.send(`Welcome to your channel ${newName}!`)
+            channel.send(`Welcome to your channel ${newUser}!`)
           })
           .then(() =>
             interaction.update({
