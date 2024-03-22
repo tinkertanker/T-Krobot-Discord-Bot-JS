@@ -75,19 +75,17 @@ module.exports = {
         //Inform user
         await newUser.send("You are now verified");
 
-        var allChannels = await interaction.guild.channels.cache;
         //Create a personal channel
         channelName = newName.replace(" ", "-").toLowerCase();
-        while(allChannels.find(c => c.name.toLowerCase() === channelName)) {
+        while(interaction.guild.channels.cache.find(c => c.name.toLowerCase() === channelName)) {
           channelName += '-';
           channelName += (Math.random() + 1).toString(36).substring(7);
         }
 
         allChannels = await interaction.guild.channels.cache;
-        var categoryName = "private-messages";
-        var parentCategory = allChannels.find((cat) => (cat.name === categoryName));
+        var parentCategory = interaction.guild.channels.cache.find((cat) => (cat.name === categoryName));
         while(true){
-          parentCategory = allChannels.find((cat) => (cat.name === categoryName)); 
+          parentCategory = interaction.guild.channels.cache.find((cat) => (cat.name === categoryName)); 
           try {
             if(parentCategory.children.cache.size >= 45) categoryName += "-";
             else break;
