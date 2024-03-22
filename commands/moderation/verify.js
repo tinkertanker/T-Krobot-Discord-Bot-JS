@@ -78,12 +78,12 @@ module.exports = {
         var allChannels = await interaction.guild.channels.cache;
         //Create a personal channel
         channelName = newName.replace(" ", "-").toLowerCase();
-        while((allChannels.find(c => c.name.toLowerCase() === channelName))) {
+        while(allChannels.find(c => c.name.toLowerCase() === channelName)) {
           channelName += '-';
           channelName += (Math.random() + 1).toString(36).substring(7);
         }
 
-        allChannels = interaction.guild.channels.cache;
+        allChannels = await interaction.guild.channels.cache;
         var categoryName = "private-messages";
         var parentCategory = allChannels.find((cat) => (cat.name === categoryName));
         while(true){
