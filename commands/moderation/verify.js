@@ -76,6 +76,7 @@ module.exports = {
         await newUser.send("You are now verified");
 
         var allChannels = await interaction.guild.channels.fetch();
+        console.log(allChannels);
         //Create a personal channel
         channelName = newName.replace(" ", "-").toLowerCase();
         while(allChannels.find(c => c.name.toLowerCase() === channelName)) {
