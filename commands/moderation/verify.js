@@ -78,7 +78,7 @@ module.exports = {
         var allChannels = await interaction.guild.channels.fetch();
         console.log(allChannels);
         //Create a personal channel
-        channelName = newName.replace(" ", "-").toLowerCase();
+        channelName = newName.replaceAll(" ", "-").toLowerCase();
         while(allChannels.find(c => c.name.toLowerCase() === channelName)) {
           channelName += '-';
           channelName += (Math.random() + 1).toString(36).substring(7);
