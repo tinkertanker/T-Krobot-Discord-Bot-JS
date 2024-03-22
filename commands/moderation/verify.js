@@ -116,32 +116,31 @@ module.exports = {
           .then((channel) => {
             channel.send(`Welcome to your channel ${newUser}!`)
           })
-          .then(() =>
-            interaction.update({
-              components: [],
-            })
-          )
           .then(() => {
             const userTag = interaction.message.mentions.users.first();
             const channelTag = interaction.guild.channels.cache.find(channel => channel.name === channelName).toString()
-            vChannel.send(`${userTag} is now verified with ${roleString} role and channel ${channelTag} has been created`);
+            interaction.editReply({
+              content: `${userTag} is now verified with ${roleString} role and channel ${channelTag} has been created`,
+              components: [],  
+            });
           })
           .catch((err) => {
             console.log(err);
-            return interaction.reply({
+            return interaction.editReply({
               content: "Could not create channel!",
             });
           });
       }
 
       if (interaction.isButton()) {
+        await interaction.deferUpdate();
         if (interaction.customId == "newtrainer") {
           giveRole(trainerRole);
         } else if (interaction.customId == "newtinkertanker") {
           giveRole(tinkertankerRole);
         } else {
           //To admins
-          interaction.reply({
+          interaction.editReply({
             content: "User was rejected.",
           });
           //To user
