@@ -1,3 +1,4 @@
+//const fetch = require('node-fetch');
 const { notionKey } = require("./config.json");
 
 function createNotionPage(name, discordInfo) {

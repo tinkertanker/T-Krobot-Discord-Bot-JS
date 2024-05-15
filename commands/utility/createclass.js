@@ -6,6 +6,7 @@ const {
   // eslint-disable-next-line no-unused-vars
   GuildCategory,
 } = require("discord.js");
+const createNotionPage = require("../../notion.js");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -86,17 +87,21 @@ module.exports = {
               }
             ],
           })
-          .then((channel) => channel.send(`<@${userID}> Welcome to the channel!`))
+          .then(async (channel) => {
+            channel.send(`<@${userID}> Welcome to the channel!`);
+            const page = await createNotionPage(channelname, channelname);
+            channel.send(`The text notion has been created at ${page.url}`);
+          })
           .catch((err) => {
             console.log(err);
             return interaction.reply({
-              content: "The channel could not be created",
+              content: "The channel / notion could not be created",
               ephemeral: true,
             });
           });
         guild.roles
           .create({
-            name: `${channelname.replace(" ", "-")}`,
+            name: `${channelname.replaceAll(" ", "-")}`,
             permissions: [
               PermissionsBitField.Flags.SendMessages,
               PermissionsBitField.Flags.ViewChannel,
