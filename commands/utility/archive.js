@@ -32,15 +32,13 @@ module.exports = {
       return interaction.reply("Invalid channel or category.");
     }
 
+    await interaction.deferReply({ ephemeral: true });
     try {
       await channelToMove.setParent(categoryToMoveTo);
-      interaction.reply(`Moved ${channelToMove} to ${categoryToMoveTo}.`);
+      await interaction.editReply(`Moved ${channelToMove} to ${categoryToMoveTo}.`);
     } catch (error) {
       console.error(error);
-      interaction.reply({
-        content: "An error occurred while moving the channel.",
-        ephermal: true,
-      });
+      await interaction.editReply("An error occurred while moving the channel.");
     }
   },
 };

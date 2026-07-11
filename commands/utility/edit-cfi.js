@@ -67,9 +67,12 @@ module.exports = {
     const messageID = options.getString("messageid");
     const unlockThread = options.getBoolean("unlock-thread");
 
-    await interaction.channel.messages
-      .fetch(messageID)
-      .then(async (message) => {
+    await interaction.deferReply({ ephemeral: true });
+    try {
+        const message = await interaction.channel.messages.fetch(messageID);
+        if (!message.embeds.length) {
+          return interaction.editReply("That message does not contain a CFI embed.");
+        }
         const targetEmbed = message.embeds[0];
         const title = options.getString("new-title") ?? targetEmbed.title;
         const what =
@@ -81,9 +84,9 @@ module.exports = {
         const who =
           options.getString("new-manpower") ?? targetEmbed.fields[1].value;
         const link =
-          options.getString("new-link") ?? targetEmbed.url ?? "No link";
+          options.getString("new-url") ?? targetEmbed.url ?? "No link";
         const image =
-          options.getAttachment("new-image") ?? targetEmbed.image.url;
+          options.getAttachment("new-image") ?? targetEmbed.image?.url ?? null;
         const newEmbed = EmbedBuilder.from(targetEmbed)
           .setTitle(
             link.includes("https://") &&
@@ -102,42 +105,26 @@ module.exports = {
             { name: "Who", value: who.replaceAll(/\\n/g, "\n"), inline: true },
             { name: "When", value: when.replaceAll(/\\n/g, "\n") }
           )
-          .setImage(typeof image == "string" ? image : image.url);
+          .setImage(image ? (typeof image == "string" ? image : image.url) : null);
 
-        try {
           await message.edit({ embeds: [newEmbed] });
-          await interaction.reply({ content: "Edited.", ephemeral: true });
-          if (message.embeds.length !== 0 || message.hasThread) {
+          const updates = ["Edited."];
+          if (message.hasThread && message.thread) {
             await message.thread.edit({ name: "CFI: " + title });
-            await interaction.followUp({
-              content: "Thread name edited as well.",
-              ephemeral: true,
-            });
+            updates.push("Thread name edited as well.");
             if (unlockThread && message.thread.locked) {
               await message.thread.setLocked(false);
-              await interaction.followUp({
-                content: "Thread unlocked.",
-                ephemeral: true,
-              });
+              updates.push("Thread unlocked.");
             } else if (!message.thread.locked) {
-              await interaction.followUp({
-                content: "Thread is not locked.", 
-                ephemeral: true
-              });
+              updates.push("Thread is not locked.");
             }
           } else {
-            await interaction.followUp({
-              content: "There is no accompanying thread to edit.",
-              ephemeral: true,
-            });
+            updates.push("There is no accompanying thread to edit.");
           }
-        } catch (error) {
-          console.error(error);
-          await interaction.reply({
-            content: "Something went wrong!",
-            ephemeral: true,
-          });
-        }
-      });
+          return interaction.editReply(updates.join(" "));
+    } catch (error) {
+      console.error(error);
+      return interaction.editReply("I couldn't find or edit that CFI message.");
+    }
   },
 };

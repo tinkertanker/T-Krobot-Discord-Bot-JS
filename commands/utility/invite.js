@@ -7,7 +7,7 @@ module.exports = {
   data: new SlashCommandBuilder()
       .setName("invite")
       .setDescription("Invite up to 5 members to a active class text channel")
-      .setDefaultMemberPermissions(PermissionFlagsBits.administrator)
+      .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
       .addChannelOption(option => 
         option 
           .setName("channel")
@@ -38,25 +38,22 @@ module.exports = {
   async execute(interaction) {
     const { options } = interaction;
     const targetChannel = options.getChannel("channel");
-    let users = [];
+    const users = [];
     
     for (let i = 1; i <= 5; i++) {
-      users.push(options.getUser("user" + i.toString()) ?? "No user");
-    };
+      const user = options.getUser(`user${i}`);
+      if (user) users.push(user);
+    }
 
     try {
-      await interaction.reply({ content: "Adding members...", ephemeral: true });
-      for (let x in users) {
-        if (users[x] !== "No user") {
-          console.log(users[x])
-          await targetChannel.permissionOverwrites.edit(users[x].id, { ViewChannel: true });
-          await interaction.editReply({ content: `${users[x].username} has been added.`, ephemeral: true });
-        } else {
-          console.log(`No user recieved ${users[x].username}`);
-        }
+      await interaction.deferReply({ ephemeral: true });
+      for (const user of users) {
+        await targetChannel.permissionOverwrites.edit(user.id, { ViewChannel: true });
       }
+      await interaction.editReply(`Added ${users.map((user) => user.username).join(", ")}.`);
     } catch(error) {
       console.error(error);
+      await interaction.editReply("I couldn't add all of those members. Check my channel permissions and try again.");
     }
   }
 }

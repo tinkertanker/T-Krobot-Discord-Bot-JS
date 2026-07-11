@@ -1,9 +1,10 @@
-const { SlashCommandBuilder } = require("discord.js");
+const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("prune")
     .setDescription("Prune up to 99 messages.")
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
     .addIntegerOption((option) =>
       option.setName("amount").setDescription("Number of messages to prune")
     ),
@@ -16,17 +17,13 @@ module.exports = {
         ephemeral: true,
       });
     }
-    await interaction.channel.bulkDelete(amount, true).catch((error) => {
+    await interaction.deferReply({ ephemeral: true });
+    try {
+      const deleted = await interaction.channel.bulkDelete(amount, true);
+      return interaction.editReply(`Successfully pruned \`${deleted.size}\` messages.`);
+    } catch (error) {
       console.error(error);
-      interaction.reply({
-        content: "There was an error trying to prune messages in this channel!",
-        ephemeral: true,
-      });
-    });
-
-    return interaction.reply({
-      content: `Successfully pruned \`${amount}\` messages.`,
-      ephemeral: true,
-    });
+      return interaction.editReply("There was an error trying to prune messages in this channel!");
+    }
   },
 };
