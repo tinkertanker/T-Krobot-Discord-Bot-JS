@@ -88,9 +88,6 @@ module.exports = {
             ],
           });
         await channel.send(`<@${userID}> Welcome to the channel!`);
-        const page = await createNotionPage(channelname, channelname);
-        if (page.url) await channel.send(`The text notion has been created at ${page.url}`);
-        else console.error("Notion page creation failed", page.error);
         await guild.roles.create({
             name: `${channelname.replaceAll(" ", "-")}`,
             permissions: [
@@ -100,7 +97,15 @@ module.exports = {
             ],
             color: "Blue",
           });
-        return interaction.editReply(page.url
+        let page;
+        try {
+          page = await createNotionPage(channelname, channelname);
+          if (page.url) await channel.send(`The text notion has been created at ${page.url}`);
+          else console.error("Notion page creation failed", page.error);
+        } catch (error) {
+          console.error("Notion page creation failed", error);
+        }
+        return interaction.editReply(page?.url
           ? "The text channel, role, and Notion page have been created."
           : "The text channel and role were created, but the Notion page could not be created.");
       } catch (error) {
