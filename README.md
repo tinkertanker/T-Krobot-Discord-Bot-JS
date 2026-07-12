@@ -78,3 +78,29 @@ docker compose up -d
 Use a test guild before production. If a credential may have been included in
 an old image or exposed elsewhere, rotate it with Discord, Notion, or short.io;
 do not merely replace the local file.
+
+## Production deployment
+
+Production runs with Docker Compose on `tinkertanker@dev.tk.sg` from:
+
+```text
+/home/tinkertanker-server/Docker/T-Krobot-Discord-Bot-JS
+```
+
+Do not deploy with a blind `git pull && docker compose up`. The Compose service
+was renamed from `server` to `bot` in July 2026, so an unmanaged cutover can
+leave both versions connected to Discord. Follow the backup, command refresh,
+cutover, verification, and rollback procedure in
+[docs/deployment.md](docs/deployment.md).
+
+The production bot has no HTTP health endpoint. A healthy deployment requires
+all of the following:
+
+- the `bot` container is running with zero restarts;
+- logs contain `Ready! Logged in as TKTrainers Bot#9903`;
+- the bot account is a member of the configured guild;
+- all 18 guild slash commands are registered; and
+- no old `server` container is running at the same time.
+
+Keep the previous stopped container and tagged rollback image until the new
+release has survived normal Discord usage for several days.
