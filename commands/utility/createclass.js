@@ -126,7 +126,7 @@ module.exports = {
             ],
           });
         await guild.roles.create({
-            name: `${channelname.replace(" ", "-")}`,
+            name: `${channelname.replaceAll(" ", "-")}`,
             permissions: [
               PermissionsBitField.Flags.SendMessages,
               PermissionsBitField.Flags.ViewChannel,

@@ -104,6 +104,7 @@ module.exports = {
       if (reason === "time") {
         await unique.edit({
           content: `${newUser}'s verification request expired. Ask them to run /verify again.`,
+          embeds: [],
           components: [],
         }).catch((error) => console.error("Could not disable an expired verification request", error));
       }
@@ -179,6 +180,7 @@ module.exports = {
         await channel.send(welcomeMessage2);
         await buttonInteraction.editReply({
           content: `${newUser} is now verified with ${roleString} role and channel ${channel} has been created`,
+          embeds: [],
           components: [],
         });
       }
@@ -194,6 +196,7 @@ module.exports = {
             //To admins
             await buttonInteraction.editReply({
               content: `${newUser} was rejected.`,
+              embeds: [],
               components: [],
             });
             //To user
@@ -205,6 +208,7 @@ module.exports = {
           console.error(error);
           await buttonInteraction.editReply({
             content: `Could not complete verification for ${newUser}. Check my role and channel permissions.`,
+            embeds: [],
             components: [],
           });
         }

@@ -103,19 +103,27 @@ module.exports = {
               inline: true,
             },
             { name: "Who", value: who.replaceAll(/\\n/g, "\n"), inline: true },
-            { name: "When", value: when.replaceAll(/\\n/g, "\n") }
+            { name: "When", value: when.replaceAll(/\\n/g, "\n") },
+            ...targetEmbed.fields.slice(3).map((field) => ({
+              name: field.name,
+              value: field.value,
+              inline: field.inline,
+            }))
           )
           .setImage(image ? (typeof image == "string" ? image : image.url) : null);
 
           await message.edit({ embeds: [newEmbed] });
           const updates = ["Edited."];
-          if (message.hasThread && message.thread) {
-            await message.thread.edit({ name: "CFI: " + title });
+          const thread = message.hasThread
+            ? message.thread ?? await message.guild.channels.fetch(message.id, { force: true })
+            : null;
+          if (thread?.isThread()) {
+            await thread.edit({ name: "CFI: " + title });
             updates.push("Thread name edited as well.");
-            if (unlockThread && message.thread.locked) {
-              await message.thread.setLocked(false);
+            if (unlockThread && thread.locked) {
+              await thread.setLocked(false);
               updates.push("Thread unlocked.");
-            } else if (!message.thread.locked) {
+            } else if (!thread.locked) {
               updates.push("Thread is not locked.");
             }
           } else {

@@ -21,8 +21,11 @@ module.exports = {
           const message = await interaction.channel.messages.fetch(messageID);
           await message.reactions.removeAll();
           await message.react("❌");
-          if (message.hasThread && message.thread) {
-            await message.thread.setLocked(true, "The CFI is now closed.");
+          const thread = message.hasThread
+            ? message.thread ?? await message.guild.channels.fetch(message.id, { force: true })
+            : null;
+          if (thread?.isThread()) {
+            await thread.setLocked(true, "The CFI is now closed.");
             return interaction.editReply("The thread is now locked. Only members with the Manage Threads permission can send messages.");
           } else {
             return interaction.editReply("The call was closed, but there is no thread on the message to lock.");
