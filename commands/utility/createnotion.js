@@ -23,15 +23,17 @@ module.exports = {
     const { options } = interaction;
     const name = options.getString("notionname");
     const discordInfo = options.getString("description");
-    const result = await createNotionPage(name, discordInfo);
-
-    await interaction.reply({
-      content: `The notion has been created at ${result.url}`,
-      ephermal: true,
-    });
-    if ("error" in result) {
-      await interaction.reply(`An error occured: ${result.error}`);
-      return;
+    await interaction.deferReply({ ephemeral: true });
+    try {
+      const result = await createNotionPage(name, discordInfo);
+      if ("error" in result || !result.url) {
+        console.error("Notion page creation failed", result.error);
+        return interaction.editReply("The Notion page could not be created. Please try again later.");
+      }
+      return interaction.editReply(`The notion has been created at ${result.url}`);
+    } catch (error) {
+      console.error(error);
+      return interaction.editReply("The Notion page could not be created. Please try again later.");
     }
   },
 };

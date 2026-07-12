@@ -18,6 +18,19 @@ module.exports = {
       } catch (error) {
         console.error(`Error executing ${interaction.commandName}`);
         console.error(error);
+        const response = {
+          content: "Something went wrong while running that command. Please try again.",
+          ephemeral: true,
+        };
+        try {
+          if (interaction.deferred || interaction.replied) {
+            await interaction.editReply(response);
+          } else {
+            await interaction.reply(response);
+          }
+        } catch (replyError) {
+          console.error("Could not report command failure to the user", replyError);
+        }
       }
     }
   },

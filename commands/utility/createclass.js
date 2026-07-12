@@ -62,11 +62,11 @@ module.exports = {
     const permissions = options.getRole("permission-role");
     const everyoneID = guild.roles.everyone.id;
     const userID = interaction.user.id;
+    await interaction.deferReply({ ephemeral: true });
 
     if (channeltype === "textchannel") {
       try {
-        await guild.channels
-          .create({
+        const channel = await guild.channels.create({
             name: `${channelname}`,
             type: ChannelType.GuildText,
             parent: parent,
@@ -86,21 +86,9 @@ module.exports = {
                 deny: ViewChannel,
               }
             ],
-          })
-          .then(async (channel) => {
-            channel.send(`<@${userID}> Welcome to the channel!`);
-            const page = await createNotionPage(channelname, channelname);
-            channel.send(`The text notion has been created at ${page.url}`);
-          })
-          .catch((err) => {
-            console.log(err);
-            return interaction.reply({
-              content: "The channel / notion could not be created",
-              ephemeral: true,
-            });
           });
-        guild.roles
-          .create({
+        await channel.send(`<@${userID}> Welcome to the channel!`);
+        await guild.roles.create({
             name: `${channelname.replaceAll(" ", "-")}`,
             permissions: [
               PermissionsBitField.Flags.SendMessages,
@@ -108,29 +96,28 @@ module.exports = {
               PermissionsBitField.Flags.ReadMessageHistory,
             ],
             color: "Blue",
-          })
-          .catch((err) => {
-            console.log(err);
-            return interaction.reply({
-              content: "The role could not be created",
-              ephemeral: true,
-            });
           });
-        await interaction.reply({
-          content: "The text channel has been created",
-          ephemeral: true,
-        });
+        let page;
+        try {
+          page = await createNotionPage(channelname, channelname);
+          if (page.url) await channel.send(`The text notion has been created at ${page.url}`);
+          else console.error("Notion page creation failed", page.error);
+        } catch (error) {
+          console.error("Notion page creation failed", error);
+        }
+        return interaction.editReply(page?.url
+          ? "The text channel, role, and Notion page have been created."
+          : "The text channel and role were created, but the Notion page could not be created.");
       } catch (error) {
         console.error(error);
-        interaction.reply("An error occurred while creating the channel.");
+        return interaction.editReply("The class channel could not be fully created. Check my channel and role permissions.");
       }
     }
     if (channeltype === "voicechannel") {
       try {
-        await guild.channels
-          .create({
+        await guild.channels.create({
             name: `${channelname}`,
-            type: ChannelType.GuildText,
+            type: ChannelType.GuildVoice,
             parent: parent,
             permissionOverwrites: [
               {
@@ -142,43 +129,20 @@ module.exports = {
                 deny: ViewChannel,
               }
             ],
-          })
-          .then((channel) => channel.send(`<@${userID}> Welcome to the channel!`))
-          .catch((err) => {
-            console.log(err);
-            return interaction.reply({
-              content: "The channel could not be created",
-              ephemeral: true,
-            });
           });
-        guild.roles
-          .create({
-            name: `${channelname.replace(" ", "-")}`,
+        await guild.roles.create({
+            name: `${channelname.replaceAll(" ", "-")}`,
             permissions: [
               PermissionsBitField.Flags.SendMessages,
               PermissionsBitField.Flags.ViewChannel,
               PermissionsBitField.Flags.ReadMessageHistory,
             ],
             color: "Blue",
-          })
-          .then((channel) => channel.send("Welcome to the channel!"))
-          .catch((err) => {
-            console.log(err);
-            return interaction.reply({
-              content: "The role could not be created",
-              ephemeral: true,
-            });
           });
-        await interaction.reply({
-          content: "The voice channel has been created",
-          ephemeral: true,
-        });
+        return interaction.editReply("The voice channel and role have been created.");
       } catch (error) {
         console.error(error);
-        interaction.reply({
-          content: "An error occurred while creating the channel.",
-          ephemeral: true,
-        });
+        return interaction.editReply("The voice channel could not be fully created. Check my channel and role permissions.");
       }
     }
   },

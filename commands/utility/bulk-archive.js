@@ -31,25 +31,25 @@ module.exports = {
       return interaction.reply("Invalid channel or category.");
     }
     
-    const client = interaction.client;
-    const channels = client.channels.cache.filter(channel => channel.name.startsWith(channelPrefixToMove));
-    var good = 0, bad = 0;
-    await channels.forEach((channel) => {
+    await interaction.deferReply({ ephemeral: true });
+    const channels = guild.channels.cache.filter((channel) =>
+      channel.name.startsWith(channelPrefixToMove) && channel.id !== categoryToMoveTo.id
+    );
+    let good = 0;
+    let bad = 0;
+    for (const channel of channels.values()) {
       try {
-        channel.setParent(categoryToMoveTo);
+        await channel.setParent(categoryToMoveTo);
         good += 1;
       } catch (error) {
         console.error(error);
         bad += 1;
       }
-    });
+    }
     if(bad == 0){
-      interaction.reply(`Moved ${good} channels with prefix ${channelPrefixToMove} to ${categoryToMoveTo}.`);
+      return interaction.editReply(`Moved ${good} channels with prefix ${channelPrefixToMove} to ${categoryToMoveTo}.`);
     } else {
-      interaction.reply({
-        content: `Moved ${good} channels, ${bad} channels were unsuccesfully moved.`,
-        ephermal: true,
-      });
+      return interaction.editReply(`Moved ${good} channels; ${bad} channels could not be moved.`);
     }
   },
 };

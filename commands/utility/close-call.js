@@ -16,31 +16,23 @@ module.exports = {
     const { options } = interaction;
     const messageID = options.getString("message-id");
 
-    await interaction.channel.messages.fetch(messageID)
-      .then(async (message) => {
-        try {
+    await interaction.deferReply({ ephemeral: true });
+    try {
+          const message = await interaction.channel.messages.fetch(messageID);
           await message.reactions.removeAll();
           await message.react("❌");
-          if (message.embeds.length == 0 || message.hasThread) {
-            await message.thread.setLocked(true, "The CFI is now closed.");
-            await interaction.reply({
-              content:
-                "The thread is now locked. Only members with the Manage Threads permissions can send messages.",
-              ephemeral: true,
-            });
+          const thread = message.hasThread
+            ? message.thread ?? await message.guild.channels.fetch(message.id, { force: true })
+            : null;
+          if (thread?.isThread()) {
+            await thread.setLocked(true, "The CFI is now closed.");
+            return interaction.editReply("The thread is now locked. Only members with the Manage Threads permission can send messages.");
           } else {
-            await interaction.reply({
-              content: "There is no thread on the message to lock.",
-              ephemeral: true,
-            });
+            return interaction.editReply("The call was closed, but there is no thread on the message to lock.");
           }
-        } catch (error) {
+    } catch (error) {
           console.error(error);
-          await interaction.reply({
-            content: "Something went wrong!",
-            ephemeral: true,
-          });
-        }
-      });
+          return interaction.editReply("I couldn't find or close that CFI message.");
+    }
   },
 };

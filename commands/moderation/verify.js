@@ -8,6 +8,7 @@ const {
   PermissionFlagsBits,
 } = require("discord.js");
 const { verificationChannel, trainerRole, tinkertankerRole, pmCategory } = require("../../config.json");
+const pendingVerifications = new Map();
 
 const welcomeMessage1 = `
 Some starting info from Tracey:\n
@@ -46,8 +47,21 @@ module.exports = {
     const vChannel = client.channels.cache.get(verificationChannel);
     const { guild } = interaction;
     const { ViewChannel, ReadMessageHistory, SendMessages } = PermissionFlagsBits;
-    
-    var unique = await vChannel.send({
+    const pendingKey = `${guild.id}:${newUser.id}`;
+
+    await interaction.deferReply({ ephemeral: true });
+    if (pendingVerifications.has(pendingKey)) {
+      return interaction.editReply("You already have a verification request waiting for an administrator.");
+    }
+    if (!vChannel?.isTextBased()) {
+      console.error("The configured verification channel is unavailable or not text-based.");
+      return interaction.editReply("Verification is not configured correctly. Please contact an administrator.");
+    }
+
+    pendingVerifications.set(pendingKey, true);
+    let unique;
+    try {
+      unique = await vChannel.send({
       content: `${newUser} joined.`,
       embeds: [
         new EmbedBuilder()
@@ -71,56 +85,81 @@ module.exports = {
             .setStyle(ButtonStyle.Danger)
         ),
       ],
-    });
+      });
+    } catch (error) {
+      pendingVerifications.delete(pendingKey);
+      throw error;
+    }
 
-    const collector = unique.createMessageComponentCollector({ time: 604800000, });
-    collector.on('collect', async interaction => {
+    const collector = unique.createMessageComponentCollector({
+      time: 604800000,
+      filter: (buttonInteraction) =>
+        buttonInteraction.memberPermissions?.has(PermissionFlagsBits.Administrator),
+    });
+    pendingVerifications.set(pendingKey, collector);
+    collector.on("end", async (_collected, reason) => {
+      if (pendingVerifications.get(pendingKey) === collector) {
+        pendingVerifications.delete(pendingKey);
+      }
+      if (reason === "time") {
+        await unique.edit({
+          content: `${newUser}'s verification request expired. Ask them to run /verify again.`,
+          embeds: [],
+          components: [],
+        }).catch((error) => console.error("Could not disable an expired verification request", error));
+      }
+    });
+    let handled = false;
+    collector.on('collect', async buttonInteraction => {
+      if (handled) return;
+      handled = true;
+      collector.stop("handled");
+
       async function giveRole(role) {
-        const newUser = interaction.message.mentions.users.first();
-        newMember = await guild.members.fetch(newUser.id); 
+        const newMember = await guild.members.fetch(newUser.id);
         //Set Nickname
         await newMember.setNickname(newName).catch((err) => {
           console.log(err);
           console.log("Could not set nickname!");
         });
         //Give user role
-        roleString = "";
+        let roleString = "";
         if(role == trainerRole) roleString = "Trainer";
         else if(role == tinkertankerRole) roleString = "Tinkertanker";
-        await newMember.roles
-          .add(role)
-          .catch((err) => {
-            console.log(err);
-            return interaction.reply({
-              content: "Could not set user role!",
-            });
-          });
+        await newMember.roles.add(role);
         //Inform user
-        await newUser.send("You are now verified");
+        await newUser.send("You are now verified").catch((err) => {
+          console.log("Could not DM verified user", err.message);
+        });
 
         var allChannels = await interaction.guild.channels.fetch();
         //Create a personal channel
-        channelName = newName.replaceAll(" ", "-").toLowerCase();
+        let channelName = newName.replaceAll(" ", "-").toLowerCase();
         while(allChannels.find(c => c.name.toLowerCase() === channelName)) {
           channelName += '-';
           channelName += (Math.random() + 1).toString(36).substring(7);
         }
 
         allChannels = await interaction.guild.channels.fetch();
-        var categoryName = "private-messages";
-        var parentCategory = allChannels.find((cat) => (cat.name === categoryName));
+        let categoryName = "private-messages";
+        let parentCategory = pmCategory ? allChannels.get(pmCategory) : null;
+        if (parentCategory?.type !== ChannelType.GuildCategory) parentCategory = null;
+        parentCategory ??= allChannels.find((cat) => cat.name === categoryName && cat.type === ChannelType.GuildCategory);
         while(true){
-          parentCategory = allChannels.find((cat) => (cat.name === categoryName)); 
+          parentCategory ??= allChannels.find((cat) => cat.name === categoryName && cat.type === ChannelType.GuildCategory);
           try {
-            if(parentCategory.children.cache.size >= 45) categoryName += "-";
+            if(parentCategory.children.cache.size >= 45) {
+              categoryName += "-";
+              parentCategory = null;
+            }
             else break;
           } catch(err){
-            parentCategory = await interaction.guild.channels.create({ name: categoryName, type: ChannelType.GuildCategory });
+            parentCategory = await guild.channels.create({ name: categoryName, type: ChannelType.GuildCategory });
             break;
           }
         }
 
-        await interaction.guild.channels
+        const channel = await guild.channels
           .create({
             name: `${channelName}`,
             type: ChannelType.GuildText,
@@ -135,45 +174,47 @@ module.exports = {
                 deny: [ViewChannel],
               },
             ],
-          })
-          .then((channel) => {
-            channel.send(`Welcome to your channel ${newUser}!`);
-            channel.send(welcomeMessage1);
-            channel.send(welcomeMessage2);
-            const userTag = interaction.message.mentions.users.first();
-            interaction.editReply({
-              content: `${userTag} is now verified with ${roleString} role and channel ${channel} has been created`,
-              components: [],  
-            });
-          })
-          .catch((err) => {
-            console.log(err);
-            return interaction.editReply({
-              content: "Could not create channel!",
-            });
           });
+        await channel.send(`Welcome to your channel ${newUser}!`);
+        await channel.send(welcomeMessage1);
+        await channel.send(welcomeMessage2);
+        await buttonInteraction.editReply({
+          content: `${newUser} is now verified with ${roleString} role and channel ${channel} has been created`,
+          embeds: [],
+          components: [],
+        });
       }
 
-      if (interaction.isButton()) {
-        await interaction.deferUpdate();
-        if (interaction.customId == "newtrainer") {
-          giveRole(trainerRole);
-        } else if (interaction.customId == "newtinkertanker") {
-          giveRole(tinkertankerRole);
-        } else {
-          //To admins
-          interaction.editReply({
-            content: "User was rejected.",
+      if (buttonInteraction.isButton()) {
+        await buttonInteraction.deferUpdate();
+        try {
+          if (buttonInteraction.customId == "newtrainer") {
+            await giveRole(trainerRole);
+          } else if (buttonInteraction.customId == "newtinkertanker") {
+            await giveRole(tinkertankerRole);
+          } else if (buttonInteraction.customId === "newreject") {
+            //To admins
+            await buttonInteraction.editReply({
+              content: `${newUser} was rejected.`,
+              embeds: [],
+              components: [],
+            });
+            //To user
+            await newUser.send("Try again, or contact an admin.").catch((err) => {
+              console.log("Could not DM rejected user", err.message);
+            });
+          }
+        } catch (error) {
+          console.error(error);
+          await buttonInteraction.editReply({
+            content: `Could not complete verification for ${newUser}. Check my role and channel permissions.`,
+            embeds: [],
+            components: [],
           });
-          //To user
-          interaction.user.send("Try again, or contact an admin.");
         }
       }
     });
     //User side
-    return interaction.reply({
-      content: `Wait for a while, we are verifying you`,
-      ephemeral: true,
-    });
+    return interaction.editReply("Wait for a while, we are verifying you");
   },
 };

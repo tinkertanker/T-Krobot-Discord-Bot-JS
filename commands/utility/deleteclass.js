@@ -14,30 +14,14 @@ module.exports = {
   async execute(interaction) {
     const { options } = interaction;
     const channel = options.getChannel("channel");
-    const role = interaction.guild.roles.cache.find(
-      (role) => role.name == channel.name
-    );
 
+    await interaction.deferReply({ ephemeral: true });
     try {
       await channel.delete();
-      await role.delete().catch((err) => {
-        console.log(err);
-        return interaction.reply({
-          content: "Role could not be created",
-          ephemeral: true,
-        });
-      });
-      await interaction.reply({
-        content: "The channel has been deleted",
-        ephermal: true,
-      });
+      await interaction.editReply("The channel has been deleted. No roles were changed.");
     } catch (error) {
-      console.log(role);
       console.error(error);
-      interaction.reply({
-        content: "An error occurred while deleting the channel.",
-        ephermal: true,
-      });
+      await interaction.editReply("An error occurred while deleting the channel.");
     }
   },
 };

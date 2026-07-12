@@ -1,55 +1,80 @@
-# Developer Guide
+# T-Krobot Discord Bot
 
-## 1. Clone the Git Repo
-## 2. Create config.json (it's gitignored)
+A Discord.js bot for TinkerTanker community administration. It provides slash
+commands for trainer verification, class channels, instructor calls, roles,
+Notion pages, and short links.
 
-Template below:
+## Requirements
 
-```js
-{
-    "clientId": "app_id",
-    "guildId": "server_id",
-    "token": "bot_token",
-    "notionKey": "",
-    "shortIoKey": "",
-    "verificationChannel": "channel_id",
-    "trainerRole": "role_id",
-    "tinkertankerRole": "role_id",
-    "pmCategory": "channel_id"
-}
+- Node.js 22
+- A Discord application and test guild
+- A Notion integration and short.io account for commands that use them
+
+## Local setup
+
+Install the locked dependencies:
+
+```sh
+npm ci
 ```
 
-You can google for most of the first 3 items, the last 4 you have to manually find after creating the test / live server
+Copy `configTemplate.json` to `config.json` and replace every placeholder with
+the IDs and credentials for your test environment. `config.json` is ignored by
+Git and Docker; never commit it or add it to an image.
 
-## 3. Deploy commands
+Restrict the file to your user on Unix-like systems when running the bot
+directly:
 
-This has to be done everytime commands are edited, even on Production version
+```sh
+chmod 600 config.json
+```
 
-```js
+Register the guild slash commands after initial setup and whenever command
+definitions change:
+
+```sh
 node deploy-commands.js
 ```
 
-## 4. Run the bot
+Then start the bot:
 
-```cpp
-node index.js
+```sh
+npm start
 ```
 
-## Production Config
+The Discord bot must have the Server Members privileged intent enabled and the
+permissions needed by the administrative commands. Its role must be above roles
+that it assigns or removes.
 
-It's in Notion    
+## Docker Compose
 
-## Glitch.com guide
+Create `config.json` on the host as described above, then run:
 
-Remember to put the following in package.json on glitch
-
-```js
-"engines": { "node": "16.x" },
-"scripts": {
-    "start": "node index.js"
-},
+```sh
+docker compose up --build -d
+docker compose logs -f bot
 ```
 
-If not deploy-commands.js will throw an error or it will die after 5 min
+Compose bind-mounts `config.json` read-only at runtime, so it is not stored in
+an image layer. The service exposes no HTTP port; it connects outbound to
+Discord and the configured integrations. Compose also limits memory, CPU, and
+process count, and rotates container logs.
 
-It should be on Glitch’s boosted plan and be up 24/7, no need weird pinging and stuff
+The container runs as UID 1000. On Linux, ensure that UID can read the bind
+mount—for example, make UID 1000 the file owner and keep mode `600`, or grant
+that UID a read ACL. Do not make the credential file world-readable. Docker
+Desktop handles bind-mount permissions through its file-sharing layer.
+
+When deploying from a different directory, keep the configuration outside the
+repository and change the bind mount's `source` to its absolute host path. Make
+sure the container's `node` user can read the file while no unrelated host users
+can. Rebuild regularly to pick up patched Node 22 Alpine base images:
+
+```sh
+docker compose build --pull
+docker compose up -d
+```
+
+Use a test guild before production. If a credential may have been included in
+an old image or exposed elsewhere, rotate it with Discord, Notion, or short.io;
+do not merely replace the local file.

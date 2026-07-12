@@ -55,6 +55,7 @@ module.exports = {
     ),
 
   async execute(interaction) {
+    await interaction.deferReply({ ephemeral: true });
     const { options } = interaction;
     const className = options.getString("title").replaceAll(/\\n/g, "\n");
     const classDetails =
@@ -97,17 +98,11 @@ module.exports = {
         name: `CFI: ${className}`,
         autoArchiveDuration: 1440,
       });
-      await interaction.reply({
-        content: "Your thread has been successfully created",
-        ephemeral: true,
-      });
       await reply.react("✅");
+      await interaction.editReply("Your thread has been successfully created");
     } catch (error) {
       console.error(error);
-      interaction.reply({
-        content: "An error occurred while creating the accompanying thread.",
-        ephemeral: true,
-      });
+      await interaction.editReply("An error occurred while creating the accompanying thread.");
     }
   },
 };
