@@ -41,7 +41,7 @@ module.exports = {
       return;
     }
     try {
-      await interaction.guild.members.cache.get(user.id).roles.remove(role);
+      await member.roles.remove(role);
       const embed = new EmbedBuilder()
         .setColor(role.color)
         .setDescription(

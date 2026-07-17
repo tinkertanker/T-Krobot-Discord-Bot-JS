@@ -37,7 +37,7 @@ module.exports = {
       return;
     }
     try {
-      await interaction.guild.members.cache.get(user.id).roles.add(role);
+      await member.roles.add(role);
       const embed = new EmbedBuilder()
         .setColor(role.color)
         .setDescription(`Succesfully added role \`${role.name}\`to ${user} `)

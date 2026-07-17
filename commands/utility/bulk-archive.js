@@ -33,7 +33,10 @@ module.exports = {
     
     await interaction.deferReply({ ephemeral: true });
     const channels = guild.channels.cache.filter((channel) =>
-      channel.name.startsWith(channelPrefixToMove) && channel.id !== categoryToMoveTo.id
+      channel.name.startsWith(channelPrefixToMove) &&
+      channel.id !== categoryToMoveTo.id &&
+      channel.type !== ChannelType.GuildCategory &&
+      channel.parentId !== categoryToMoveTo.id
     );
     let good = 0;
     let bad = 0;
