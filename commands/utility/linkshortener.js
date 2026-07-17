@@ -30,10 +30,16 @@ module.exports = {
     }
 
     await interaction.deferReply({ ephemeral: true });
-    const result = await shortenURL(url.toString(), path);
+    let result;
+    try {
+      result = await shortenURL(url.toString(), path);
+    } catch (error) {
+      console.error("URL shortening failed", error);
+      return interaction.editReply("The URL could not be shortened. Check the requested path and try again.");
+    }
 
-    if ("error" in result) {
-      console.error("URL shortening failed", result.error);
+    if (result === null || typeof result !== "object" || "error" in result || !result.shortURL) {
+      console.error("URL shortening failed", result?.error ?? result);
       return interaction.editReply("The URL could not be shortened. Check the requested path and try again.");
     }
 

@@ -64,24 +64,41 @@ module.exports = {
     const classTime = options.getString("when").replaceAll(/\\n/g, "\n");
     const classLocation = options.getString("where").replaceAll(/\\n/g, "\n");
     const classManpower = options.getString("who").replaceAll(/\\n/g, "\n");
-    const classURL = options.getString("link") ?? "No link";
+    const rawLink = options.getString("link");
     let classImage =
       options.getAttachment("image") ??
       "https://tinkertanker.com/assets/images/image09.png?v=b3748329";
-    const channel = interaction.channel ?? "Not a text channel";
+    const channel = interaction.channel;
+
+    if (!channel) {
+      return interaction.editReply("This command can only be used in a text channel.");
+    }
+
+    let classURL = null;
+    if (rawLink) {
+      try {
+        const parsed = new URL(rawLink);
+        if (!["http:", "https:"].includes(parsed.protocol)) {
+          throw new Error("unsupported protocol");
+        }
+        classURL = rawLink;
+      } catch {
+        return interaction.editReply(
+          "The link must be a valid HTTP or HTTPS URL. Don't forget the https://"
+        );
+      }
+    }
 
     if (typeof classImage !== "string") {
       classImage = classImage.url;
     }
 
-    const replyEmbed = await new EmbedBuilder()
+    const replyEmbed = new EmbedBuilder()
       .setColor(0x0099ff)
       .setTitle(
-        classURL.includes("https://")
-          ? className + " (Click here for map link)"
-          : className
+        classURL ? className + " (Click here for map link)" : className
       )
-      .setURL(classURL.includes("No link") ? null : classURL)
+      .setURL(classURL)
       .setDescription(classDetails)
       .addFields(
         { name: "Where", value: classLocation, inline: true },

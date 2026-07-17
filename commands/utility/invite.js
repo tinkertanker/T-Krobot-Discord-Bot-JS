@@ -38,12 +38,13 @@ module.exports = {
   async execute(interaction) {
     const { options } = interaction;
     const targetChannel = options.getChannel("channel");
-    const users = [];
-    
+    const usersById = new Map();
+
     for (let i = 1; i <= 5; i++) {
       const user = options.getUser(`user${i}`);
-      if (user) users.push(user);
+      if (user) usersById.set(user.id, user);
     }
+    const users = [...usersById.values()];
 
     try {
       await interaction.deferReply({ ephemeral: true });

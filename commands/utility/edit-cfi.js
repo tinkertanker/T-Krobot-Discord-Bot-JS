@@ -74,6 +74,16 @@ module.exports = {
           return interaction.editReply("That message does not contain a CFI embed.");
         }
         const targetEmbed = message.embeds[0];
+        // A CFI embed always carries a title, a description, and at least the
+        // Where/Who/When fields. Anything else (another bot's embed, a bare
+        // link preview) would crash the rewrite below.
+        if (
+          !targetEmbed.title ||
+          !targetEmbed.description ||
+          (targetEmbed.fields?.length ?? 0) < 3
+        ) {
+          return interaction.editReply("That message does not contain a CFI embed.");
+        }
         const title = options.getString("new-title") ?? targetEmbed.title;
         const what =
           options.getString("new-description") ?? targetEmbed.description;
