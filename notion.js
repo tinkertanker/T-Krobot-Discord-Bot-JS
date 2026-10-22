@@ -2,12 +2,15 @@
 const { notionKey } = require("./config.json");
 
 function createNotionPage(name, discordInfo) {
-  const databaseId = "64ec0317d92c47ecb19fec1e78a8a6c7";
+  // The class database has multiple data sources; write to the main one
+  // ("Classes for TKtrainers database"). Multi-source databases require
+  // Notion-Version >= 2025-09-03 and a data_source_id parent.
+  const dataSourceId = "e5451886-30b8-41b7-94e8-1991240255fe";
   const url = "https://api.notion.com/v1/pages";
 
   const requestBody = {
     parent: {
-      database_id: databaseId,
+      data_source_id: dataSourceId,
     },
     properties: {
       Name: {
@@ -37,7 +40,7 @@ function createNotionPage(name, discordInfo) {
   return fetch(url, {
     method: "POST",
     headers: {
-      "Notion-Version": "2022-06-28",
+      "Notion-Version": "2025-09-03",
       Authorization: `Bearer ${notionKey}`,
       "Content-Type": "application/json",
     },

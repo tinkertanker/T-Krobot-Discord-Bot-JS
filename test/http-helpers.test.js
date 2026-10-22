@@ -50,9 +50,9 @@ test("createNotionPage posts the expected page structure with auth headers", asy
   const result = await createNotionPage("Class Name", "discord info");
   assert.equal(capture.url, "https://api.notion.com/v1/pages");
   assert.equal(capture.options.headers.Authorization, `Bearer ${notionKey}`);
-  assert.equal(capture.options.headers["Notion-Version"], "2022-06-28");
+  assert.equal(capture.options.headers["Notion-Version"], "2025-09-03");
   const body = JSON.parse(capture.options.body);
-  assert.equal(body.parent.database_id, "64ec0317d92c47ecb19fec1e78a8a6c7");
+  assert.equal(body.parent.data_source_id, "e5451886-30b8-41b7-94e8-1991240255fe");
   assert.equal(body.properties.Name.title[0].text.content, "Class Name");
   assert.equal(body.properties.DiscordInfo.rich_text[0].text.content, "discord info");
   assert.equal(body.properties.Active.checkbox, true);

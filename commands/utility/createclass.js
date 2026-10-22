@@ -101,7 +101,7 @@ module.exports = {
         try {
           page = await createNotionPage(channelname, channelname);
           if (page.url) await channel.send(`The text notion has been created at ${page.url}`);
-          else console.error("Notion page creation failed", page.error);
+          else console.error("Notion page creation failed", page.code ?? JSON.stringify(page));
         } catch (error) {
           console.error("Notion page creation failed", error);
         }
