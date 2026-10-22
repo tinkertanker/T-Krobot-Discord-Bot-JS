@@ -27,7 +27,7 @@ module.exports = {
     try {
       const result = await createNotionPage(name, discordInfo);
       if ("error" in result || !result.url) {
-        console.error("Notion page creation failed", result.error);
+        console.error("Notion page creation failed", result.code ?? JSON.stringify(result));
         return interaction.editReply("The Notion page could not be created. Please try again later.");
       }
       return interaction.editReply(`The notion has been created at ${result.url}`);
