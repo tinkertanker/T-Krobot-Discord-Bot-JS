@@ -36,8 +36,8 @@ module.exports = {
           .setDescription("The user that you wish to add")),
 
   async execute(interaction) {
-    const { options } = interaction;
-    const targetChannel = options.getChannel("channel");
+    const { options, guild } = interaction;
+    const channelOption = options.getChannel("channel");
     const usersById = new Map();
 
     for (let i = 1; i <= 5; i++) {
@@ -48,6 +48,12 @@ module.exports = {
 
     try {
       await interaction.deferReply({ ephemeral: true });
+      // getChannel can return an APIChannel (no .permissionOverwrites) when the
+      // channel isn't in cache; fetch it so we always get a GuildChannel.
+      const targetChannel = await guild.channels.fetch(channelOption.id);
+      if (!targetChannel?.permissionOverwrites) {
+        return interaction.editReply("I can't manage permissions on that channel. Pick a server text channel and try again.");
+      }
       for (const user of users) {
         await targetChannel.permissionOverwrites.edit(user.id, { ViewChannel: true });
       }

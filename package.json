@@ -17,6 +17,6 @@
     "discord.js": "^14.26.5"
   },
   "overrides": {
-    "undici": "6.27.0"
+    "undici": "6.28.1"
   }
 }
