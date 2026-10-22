@@ -1,7 +1,7 @@
 "use strict";
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { Collection } = require("discord.js");
+const { Collection, DiscordAPIError } = require("discord.js");
 const {
   createInteraction,
   createTextChannel,
@@ -87,4 +87,52 @@ test("invite reports a helpful error when the channel cannot be managed", async 
     "I can't manage permissions on that channel. Pick a server text channel and try again."
   );
   assert.equal(interaction.edits.length, 1, "must produce exactly one follow-up");
+});
+
+test("invite reports the channel error when the fetch rejects with Unknown Channel", async () => {
+  const apiChannel = { id: "chan-private" };
+  const unknownChannel = new DiscordAPIError(
+    { code: 10003, message: "Unknown Channel", errors: {} },
+    10003, 404, "GET", "/channels/chan-private", {}
+  );
+  const interaction = createInteraction({
+    optionValues: { channel: apiChannel, user1: createUser() },
+    guild: createGuild({ channelFetchError: unknownChannel }),
+  });
+  await invite.execute(interaction);
+  assert.equal(
+    responseText(interaction),
+    "I can't manage permissions on that channel. Pick a server text channel and try again."
+  );
+  assert.equal(interaction.edits.length, 1, "must produce exactly one follow-up");
+});
+
+test("invite reports the channel error when the fetch rejects with Missing Access", async () => {
+  const apiChannel = { id: "chan-private" };
+  const missingAccess = new DiscordAPIError(
+    { code: 50001, message: "Missing Access", errors: {} },
+    50001, 403, "GET", "/channels/chan-private", {}
+  );
+  const interaction = createInteraction({
+    optionValues: { channel: apiChannel, user1: createUser() },
+    guild: createGuild({ channelFetchError: missingAccess }),
+  });
+  await invite.execute(interaction);
+  assert.equal(
+    responseText(interaction),
+    "I can't manage permissions on that channel. Pick a server text channel and try again."
+  );
+});
+
+test("invite reports the generic error when the fetch fails for another reason", async () => {
+  const apiChannel = { id: "chan-flaky" };
+  const interaction = createInteraction({
+    optionValues: { channel: apiChannel, user1: createUser() },
+    guild: createGuild({ channelFetchError: new Error("socket hangup") }),
+  });
+  await invite.execute(interaction);
+  assert.equal(
+    responseText(interaction),
+    "I couldn't add all of those members. Check my channel permissions and try again."
+  );
 });
