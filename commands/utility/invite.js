@@ -1,6 +1,8 @@
 const {
   SlashCommandBuilder,
   PermissionFlagsBits,
+  DiscordAPIError,
+  RESTJSONErrorCodes,
 } = require("discord.js");
 
 module.exports = {
@@ -36,8 +38,8 @@ module.exports = {
           .setDescription("The user that you wish to add")),
 
   async execute(interaction) {
-    const { options } = interaction;
-    const targetChannel = options.getChannel("channel");
+    const { options, guild } = interaction;
+    const channelOption = options.getChannel("channel");
     const usersById = new Map();
 
     for (let i = 1; i <= 5; i++) {
@@ -48,6 +50,26 @@ module.exports = {
 
     try {
       await interaction.deferReply({ ephemeral: true });
+      // getChannel can return an APIChannel (no .permissionOverwrites) when the
+      // channel isn't in cache; fetch it so we always get a GuildChannel.
+      // The fetch itself rejects for channels the bot cannot see.
+      let targetChannel;
+      try {
+        targetChannel = await guild.channels.fetch(channelOption.id);
+      } catch (error) {
+        if (
+          error instanceof DiscordAPIError &&
+          (error.code === RESTJSONErrorCodes.UnknownChannel ||
+            error.code === RESTJSONErrorCodes.MissingAccess)
+        ) {
+          targetChannel = null;
+        } else {
+          throw error;
+        }
+      }
+      if (!targetChannel?.permissionOverwrites) {
+        return interaction.editReply("I can't manage permissions on that channel. Pick a server text channel and try again.");
+      }
       for (const user of users) {
         await targetChannel.permissionOverwrites.edit(user.id, { ViewChannel: true });
       }

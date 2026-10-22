@@ -311,6 +311,7 @@ function createGuild(overrides = {}) {
     channels: {
       cache: channelsCache,
       async fetch(id, options) {
+        if (overrides.channelFetchError) throw overrides.channelFetchError;
         if (id === undefined) return channelsCache;
         return channelsCache.get(id) ?? null;
       },
