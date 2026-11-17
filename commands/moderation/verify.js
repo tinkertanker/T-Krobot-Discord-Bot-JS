@@ -135,7 +135,7 @@ module.exports = {
         var allChannels = await interaction.guild.channels.fetch();
         //Create a personal channel
         let channelName = newName.replaceAll(" ", "-").toLowerCase();
-        while(allChannels.find(c => c.name.toLowerCase() === channelName)) {
+        while(allChannels.find(c => c?.name?.toLowerCase() === channelName)) {
           channelName += '-';
           channelName += (Math.random() + 1).toString(36).substring(7);
         }
@@ -144,9 +144,9 @@ module.exports = {
         let categoryName = "private-messages";
         let parentCategory = pmCategory ? allChannels.get(pmCategory) : null;
         if (parentCategory?.type !== ChannelType.GuildCategory) parentCategory = null;
-        parentCategory ??= allChannels.find((cat) => cat.name === categoryName && cat.type === ChannelType.GuildCategory);
+        parentCategory ??= allChannels.find((cat) => cat?.name === categoryName && cat.type === ChannelType.GuildCategory);
         while(true){
-          parentCategory ??= allChannels.find((cat) => cat.name === categoryName && cat.type === ChannelType.GuildCategory);
+          parentCategory ??= allChannels.find((cat) => cat?.name === categoryName && cat.type === ChannelType.GuildCategory);
           try {
             if(parentCategory.children.cache.size >= 45) {
               categoryName += "-";
